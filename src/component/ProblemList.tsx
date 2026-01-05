@@ -1,15 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle2, Circle, Code, ArrowLeft, Crown, Lock } from 'lucide-react'
+import { CheckCircle2, Circle, Code, Home, Crown, Lock } from 'lucide-react'
 import { getProblemsByTopicAndLevel, Problem } from '../lib/problems'
-import PremiumModal from '../component/PremiumModal'
+import PremiumModal from './PremiumModal'
 
 interface ProblemListProps {
   topic: string
   topicName: string
   level: string
   onBack: () => void
+  onBackToDashboard: () => void
   onProblemSelect: (problem: Problem) => void
 }
 
@@ -18,6 +19,7 @@ export default function ProblemList({
   topicName, 
   level, 
   onBack,
+  onBackToDashboard,
   onProblemSelect 
 }: ProblemListProps) {
   const problems = getProblemsByTopicAndLevel(topic, level)
@@ -33,22 +35,30 @@ export default function ProblemList({
 
   return (
     <div className="min-h-screen bg-[#0A0A0F]">
-      {/* Premium Gradient Background */}
       <div className="fixed inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 pointer-events-none" />
       
       {/* Header */}
       <header className="relative border-b border-zinc-800/50 backdrop-blur-xl bg-[#13131A]/80 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <button
-              onClick={onBack}
-              className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={onBackToDashboard}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-700/50 transition-all"
+              >
+                <Home className="w-4 h-4" />
+                <span className="text-sm font-medium">Dashboard</span>
+              </button>
+              <div className="h-6 w-px bg-zinc-700" />
+              <button
+                onClick={onBack}
+                className="text-sm text-zinc-400 hover:text-white transition-colors"
+              >
+                {topicName}
+              </button>
+            </div>
             
-            <div className={`px-3 py-1.5 rounded-lg text-xs font-bold ${
+            <div className={`px-4 py-2 rounded-lg text-xs font-bold ${
               level === 'basic' 
                 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                 : level === 'medium'
@@ -64,9 +74,9 @@ export default function ProblemList({
       <div className="relative max-w-7xl mx-auto px-6 py-8">
         <div className="mb-8 animate-fadeInUp">
           <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-white via-white to-zinc-400 bg-clip-text text-transparent">
-            {topicName}
+            {topicName} - {level}
           </h1>
-          <p className="text-zinc-400">{problems.length} problems • {level} difficulty</p>
+          <p className="text-zinc-400">{problems.length} problems to master</p>
         </div>
 
         <div className="space-y-3 animate-fadeInUp">
@@ -76,7 +86,6 @@ export default function ProblemList({
               onClick={() => handleProblemClick(problem)}
               className="w-full group relative bg-gradient-to-br from-zinc-900/50 to-zinc-900/30 border border-zinc-800/50 rounded-xl p-5 hover:border-indigo-500/50 hover:shadow-lg hover:shadow-indigo-500/10 transition-all text-left overflow-hidden"
             >
-              {/* Premium Gradient Overlay */}
               {problem.premium && (
                 <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 to-yellow-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
               )}
