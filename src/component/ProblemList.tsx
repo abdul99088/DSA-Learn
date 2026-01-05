@@ -5,7 +5,7 @@ import { CheckCircle2, Circle, Code, Home, Crown, Lock } from 'lucide-react'
 import { getProblemsByTopicAndLevel, Problem } from '../lib/problems'
 import PremiumModal from './PremiumModal'
 
-interface ProblemListProps {
+export interface ProblemListProps  {
   topic: string
   topicName: string
   level: string
@@ -14,14 +14,18 @@ interface ProblemListProps {
   onProblemSelect: (problem: Problem) => void
 }
 
-export default function ProblemList({ 
-  topic, 
-  topicName, 
-  level, 
+export default function ProblemList({
+  topic,
+  topicName,
+  level,
   onBack,
   onBackToDashboard,
-  onProblemSelect 
-}: ProblemListProps) {
+  onProblemSelect,
+  ...rest
+}: ProblemListProps & Record<string, any>) {
+  
+
+
   const problems = getProblemsByTopicAndLevel(topic, level)
   const [showPremiumModal, setShowPremiumModal] = useState(false)
 
