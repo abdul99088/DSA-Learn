@@ -1,31 +1,20 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle2, Circle, Code, Home, Crown, Lock } from 'lucide-react'
+import { CheckCircle2, Circle, Code, Home, Crown, Lock, ChevronLeft } from 'lucide-react'
 import { getProblemsByTopicAndLevel, Problem } from '../lib/problems'
 import PremiumModal from './PremiumModal'
 
-export interface ProblemListProps  {
+type ProblemListProps = {
   topic: string
   topicName: string
   level: string
   onBack: () => void
-  onBackToDashboard: () => void
   onProblemSelect: (problem: Problem) => void
 }
 
-export default function ProblemList({
-  topic,
-  topicName,
-  level,
-  onBack,
-  onBackToDashboard,
-  onProblemSelect,
-  ...rest
-}: ProblemListProps & Record<string, any>) {
-  
-
-
+export default function ProblemList(props: ProblemListProps) {
+  const { topic, topicName, level, onBack, onProblemSelect } = props
   const problems = getProblemsByTopicAndLevel(topic, level)
   const [showPremiumModal, setShowPremiumModal] = useState(false)
 
@@ -41,24 +30,16 @@ export default function ProblemList({
     <div className="min-h-screen bg-[#0A0A0F]">
       <div className="fixed inset-0 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5 pointer-events-none" />
       
-      {/* Header */}
       <header className="relative border-b border-zinc-800/50 backdrop-blur-xl bg-[#13131A]/80 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button
-                onClick={onBackToDashboard}
+                onClick={onBack}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-700/50 transition-all"
               >
-                <Home className="w-4 h-4" />
-                <span className="text-sm font-medium">Dashboard</span>
-              </button>
-              <div className="h-6 w-px bg-zinc-700" />
-              <button
-                onClick={onBack}
-                className="text-sm text-zinc-400 hover:text-white transition-colors"
-              >
-                {topicName}
+                <ChevronLeft className="w-4 h-4" />
+                <span className="text-sm font-medium">Back to {topicName}</span>
               </button>
             </div>
             

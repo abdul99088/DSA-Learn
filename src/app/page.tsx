@@ -10,12 +10,9 @@ import FeedbackButton from '../component/FeedbackButton'
 import { Problem } from '../lib/problems'
 
 export default function Home() {
-
-  
   const [view, setView] = useState<
-  'auth' | 'dashboard' | 'topic' | 'problems' | 'editor'
->('auth')
-
+    'auth' | 'dashboard' | 'topic' | 'problems' | 'editor'
+  >('auth')
 
   const [selectedTopic, setSelectedTopic] = useState<any>(null)
   const [selectedLevel, setSelectedLevel] = useState<string>('')
@@ -74,7 +71,6 @@ export default function Home() {
           topicName={selectedTopic.name}
           level={selectedLevel}
           onBack={handleBackToTopic}
-          onBackToDashboard={handleBackToDashboard}
           onProblemSelect={handleProblemSelect}
         />
       )}
