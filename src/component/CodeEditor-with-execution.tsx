@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Play, Check, X, ArrowLeft, Code2, Terminal, BookOpen, CheckCircle } from 'lucide-react'
-import { Problem } from '../lib/problems'
+import { Play, Check, X, ArrowLeft, Code2, Terminal, BookOpen } from 'lucide-react'
+import { Problem, ProgrammingLanguage } from '../lib/problems-complete'
+import { executeCode } from '../lib/codeRunner'
 
 interface CodeEditorProps {
   problem: Problem
@@ -17,35 +18,80 @@ interface TestResult {
   error?: string
 }
 
+const languageConfig = {
+  python: {
+    name: 'Python',
+    extension: '.py',
+    color: 'from-blue-500 to-yellow-500'
+  },
+  cpp: {
+    name: 'C++',
+    extension: '.cpp',
+    color: 'from-blue-600 to-purple-600'
+  },
+  java: {
+    name: 'Java',
+    extension: '.java',
+    color: 'from-red-500 to-orange-500'
+  }
+}
+
 export default function CodeEditor({ problem, onBack }: CodeEditorProps) {
-  const [code, setCode] = useState(problem.starterCode)
+  const [selectedLanguage, setSelectedLanguage] = useState<ProgrammingLanguage>('python')
+  const [code, setCode] = useState(problem.starterCode.python)
   const [activeTab, setActiveTab] = useState<'description' | 'solution'>('description')
   const [testResults, setTestResults] = useState<TestResult[]>([])
   const [isRunning, setIsRunning] = useState(false)
   const [showResults, setShowResults] = useState(false)
 
-  const runCode = () => {
+  const handleLanguageChange = (lang: ProgrammingLanguage) => {
+    setSelectedLanguage(lang)
+    setCode(problem.starterCode[lang])
+    setTestResults([])
+    setShowResults(false)
+  }
+
+  const runCode = async () => {
     setIsRunning(true)
     setShowResults(true)
-    
-    setTimeout(() => {
-      const results: TestResult[] = problem.testCases.map((testCase) => {
-        const passed = Math.random() > 0.3
-        return {
-          passed,
+    setTestResults([])
+
+    try {
+      // Run all test cases
+      const results: TestResult[] = []
+      
+      for (const testCase of problem.testCases) {
+        const result = await executeCode(code, testCase, selectedLanguage)
+        results.push({
+          passed: result.passed,
           input: testCase.input,
           expectedOutput: testCase.expectedOutput,
-          actualOutput: passed ? testCase.expectedOutput : 'null',
-          error: passed ? undefined : 'Output mismatch'
-        }
-      })
+          actualOutput: result.actualOutput,
+          error: result.error
+        })
+      }
+      
       setTestResults(results)
+    } catch (error) {
+      console.error('Execution error:', error)
+      setTestResults([{
+        passed: false,
+        input: problem.testCases[0]?.input || '',
+        expectedOutput: problem.testCases[0]?.expectedOutput || '',
+        actualOutput: '',
+        error: 'Failed to execute code. Please try again.'
+      }])
+    } finally {
       setIsRunning(false)
-    }, 1500)
+    }
   }
 
   const submitCode = () => {
-    alert('Code submitted! 🎉')
+    if (allTestsPassed) {
+      alert('✅ All tests passed! Code submitted successfully! 🎉')
+    } else {
+      alert('❌ Some tests failed. Please fix your code and try again.')
+    }
   }
 
   const allTestsPassed = testResults.length > 0 && testResults.every(r => r.passed)
@@ -86,18 +132,19 @@ export default function CodeEditor({ problem, onBack }: CodeEditorProps) {
                 {isRunning ? (
                   <>
                     <div className="w-4 h-4 border-2 border-zinc-600 border-t-white rounded-full animate-spin" />
-                    Running
+                    Running...
                   </>
                 ) : (
                   <>
                     <Play className="w-4 h-4" />
-                    Run
+                    Run Code
                   </>
                 )}
               </button>
               <button
                 onClick={submitCode}
-                className="px-4 py-2 rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 transition-all text-sm font-medium"
+                disabled={isRunning}
+                className="px-4 py-2 rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 transition-all text-sm font-medium disabled:opacity-50"
               >
                 Submit
               </button>
@@ -169,10 +216,28 @@ export default function CodeEditor({ problem, onBack }: CodeEditorProps) {
 
         {/* Right - Code Editor & Results */}
         <div className="flex flex-col overflow-hidden">
+          {/* Language Selector */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800/50">
+            <div className="flex gap-2">
+              {(Object.keys(languageConfig) as ProgrammingLanguage[]).map((lang) => (
+                <button
+                  key={lang}
+                  onClick={() => handleLanguageChange(lang)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    selectedLanguage === lang
+                      ? `bg-gradient-to-r ${languageConfig[lang].color} text-white shadow-lg`
+                      : 'bg-zinc-800/50 text-zinc-400 hover:text-white hover:bg-zinc-800'
+                  }`}
+                >
+                  {languageConfig[lang].name}
+                </button>
+              ))}
+            </div>
             <div className="flex items-center gap-2 text-zinc-400">
               <Code2 className="w-4 h-4" />
-              <span className="text-sm font-medium">Code</span>
+              <span className="text-xs font-mono">
+                {languageConfig[selectedLanguage].extension}
+              </span>
             </div>
           </div>
           
@@ -181,6 +246,7 @@ export default function CodeEditor({ problem, onBack }: CodeEditorProps) {
             onChange={(e) => setCode(e.target.value)}
             className="flex-1 p-6 bg-zinc-950 text-zinc-100 font-mono text-sm resize-none outline-none"
             spellCheck={false}
+            placeholder={`Write your ${languageConfig[selectedLanguage].name} code here...`}
           />
 
           {/* Test Results */}
@@ -192,7 +258,7 @@ export default function CodeEditor({ problem, onBack }: CodeEditorProps) {
                   <span className="text-sm font-medium">Test Results</span>
                 </div>
                 {testResults.length > 0 && (
-                  <div className={`px-2 py-1 rounded text-xs font-medium ${
+                  <div className={`px-3 py-1 rounded-full text-xs font-medium ${
                     allTestsPassed
                       ? 'bg-green-500/10 text-green-400'
                       : 'bg-red-500/10 text-red-400'
@@ -203,44 +269,56 @@ export default function CodeEditor({ problem, onBack }: CodeEditorProps) {
               </div>
               
               <div className="p-4 space-y-3 max-h-[300px] overflow-y-auto">
-                {testResults.map((result, i) => (
-                  <div
-                    key={i}
-                    className={`rounded-lg p-4 border ${
-                      result.passed
-                        ? 'bg-green-500/5 border-green-500/20'
-                        : 'bg-red-500/5 border-red-500/20'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 mb-3">
-                      {result.passed ? (
-                        <Check className="w-4 h-4 text-green-400" />
-                      ) : (
-                        <X className="w-4 h-4 text-red-400" />
-                      )}
-                      <span className={`text-sm font-medium ${result.passed ? 'text-green-400' : 'text-red-400'}`}>
-                        Test {i + 1}
-                      </span>
-                    </div>
-                    
-                    <div className="space-y-2 font-mono text-xs">
-                      <div>
-                        <span className="text-zinc-500">Input:</span>
-                        <span className="text-zinc-300 ml-2">{result.input}</span>
-                      </div>
-                      <div>
-                        <span className="text-zinc-500">Expected:</span>
-                        <span className="text-zinc-300 ml-2">{result.expectedOutput}</span>
-                      </div>
-                      <div>
-                        <span className="text-zinc-500">Got:</span>
-                        <span className={`ml-2 ${result.passed ? 'text-green-400' : 'text-red-400'}`}>
-                          {result.actualOutput}
+                {isRunning && testResults.length === 0 ? (
+                  <div className="text-center py-8">
+                    <div className="w-8 h-8 border-2 border-zinc-600 border-t-white rounded-full animate-spin mx-auto mb-3" />
+                    <p className="text-zinc-400 text-sm">Executing code...</p>
+                  </div>
+                ) : (
+                  testResults.map((result, i) => (
+                    <div
+                      key={i}
+                      className={`rounded-lg p-4 border ${
+                        result.passed
+                          ? 'bg-green-500/5 border-green-500/20'
+                          : 'bg-red-500/5 border-red-500/20'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-3">
+                        {result.passed ? (
+                          <Check className="w-4 h-4 text-green-400" />
+                        ) : (
+                          <X className="w-4 h-4 text-red-400" />
+                        )}
+                        <span className={`text-sm font-medium ${result.passed ? 'text-green-400' : 'text-red-400'}`}>
+                          Test Case {i + 1}
                         </span>
                       </div>
+                      
+                      <div className="space-y-2 font-mono text-xs">
+                        <div>
+                          <span className="text-zinc-500">Input:</span>
+                          <span className="text-zinc-300 ml-2">{result.input}</span>
+                        </div>
+                        <div>
+                          <span className="text-zinc-500">Expected:</span>
+                          <span className="text-zinc-300 ml-2">{result.expectedOutput}</span>
+                        </div>
+                        <div>
+                          <span className="text-zinc-500">Got:</span>
+                          <span className={`ml-2 ${result.passed ? 'text-green-400' : 'text-red-400'}`}>
+                            {result.actualOutput}
+                          </span>
+                        </div>
+                        {result.error && (
+                          <div className="pt-2 border-t border-zinc-800">
+                            <span className="text-red-400 text-xs">{result.error}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           )}

@@ -5,10 +5,10 @@ import AuthView from '../component/AuthView'
 import Dashboard from '../component/Dashboard'
 import TopicView from '../component/TopicView'
 import ProblemList from '../component/ProblemList'
-import CodeEditor from '../component/CodeEditor'
+import CodeEditor from '../component/CodeEditor-with-execution'
 import FeedbackButton from '../component/FeedbackButton'
 import { supabase } from '../lib/supabaseClient'
-import { Problem } from '../lib/problems'
+import { Problem } from '../lib/problems-complete'
 
 export default function Home() {
   const [view, setView] = useState<

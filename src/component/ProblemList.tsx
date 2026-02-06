@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { CheckCircle2, Circle, Code, Home, Crown, Lock, ChevronLeft } from 'lucide-react'
-import { getProblemsByTopicAndLevel, Problem } from '../lib/problems'
+import { getProblemsByTopicAndLevel, Problem } from '../lib/problems-complete'
 import PremiumModal from './PremiumModal'
 
 type ProblemListProps = {

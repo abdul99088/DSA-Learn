@@ -1,24 +1,67 @@
 'use client'
 
+// Export all types
+export type DifficultyLevel = 'basic' | 'medium' | 'hard'
+export type ProgrammingLanguage = 'python' | 'cpp' | 'java'
+
+export interface TestCase {
+  input: string
+  expectedOutput: string
+}
+
+export interface Example {
+  input: string
+  output: string
+  explanation?: string
+}
+
+export interface StarterCode {
+  python: string
+  cpp: string
+  java: string
+}
+
 export interface Problem {
   id: string
   title: string
-  difficulty: 'basic' | 'medium' | 'hard'
+  difficulty: DifficultyLevel
   topic: string
   description: string
   premium: boolean
-  examples: {
-    input: string
-    output: string
-    explanation?: string
-  }[]
+  examples: Example[]
   constraints: string[]
-  starterCode: string
-  testCases: {
-    input: string
-    expectedOutput: string
-  }[]
+  starterCode: StarterCode
+  testCases: TestCase[]
   completed: boolean
+}
+
+// Helper function to convert JavaScript starter code to other languages
+function convertStarterCode(jsCode: string, funcName: string = ''): StarterCode {
+  // Extract function name if not provided
+  if (!funcName) {
+    const match = jsCode.match(/function\s+(\w+)/)
+    funcName = match ? match[1] : 'solution'
+  }
+
+  // Basic conversion templates
+  return {
+    python: `def ${funcName}():
+    # Write your code here
+    pass`,
+    cpp: `class Solution {
+public:
+    auto ${funcName}() {
+        // Write your code here
+        
+    }
+};`,
+    java: `class Solution {
+    public Object ${funcName}() {
+        // Write your code here
+        
+    }
+}`
+  }
 }
 
 export const problems: Problem[] = [
@@ -30,11 +73,33 @@ export const problems: Problem[] = [
     title: 'Two Sum',
     difficulty: 'basic',
     topic: 'data-structures',
-    premium: false, // FREE
+    premium: false,
     description: 'Find two numbers in array that add up to target sum. Return their indices.',
     examples: [{ input: '[2,7,11,15], target=9', output: '[0,1]', explanation: '2 + 7 = 9' }],
     constraints: ['2 ≤ nums.length ≤ 10⁴', 'Each input has exactly one solution'],
-    starterCode: `function twoSum(nums, target) {\n  // Write your code here\n  \n}`,
+    starterCode: {
+      python: `def twoSum(nums, target):
+    """
+    :type nums: List[int]
+    :type target: int
+    :rtype: List[int]
+    """
+    # Write your code here
+    pass`,
+      cpp: `class Solution {
+public:
+    vector<int> twoSum(vector<int>& nums, int target) {
+        // Write your code here
+        
+    }
+};`,
+      java: `class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        // Write your code here
+        
+    }
+}`
+    },
     testCases: [{ input: '[2,7,11,15], 9', expectedOutput: '[0,1]' }],
     completed: false
   },
@@ -43,11 +108,32 @@ export const problems: Problem[] = [
     title: 'Valid Parentheses',
     difficulty: 'basic',
     topic: 'data-structures',
-    premium: false, // FREE
+    premium: false,
     description: 'Check if string with brackets (), {}, [] is valid. Open brackets must close in correct order.',
     examples: [{ input: '"{[()]}"', output: 'true' }, { input: '"{[(])}"', output: 'false' }],
     constraints: ['Use stack data structure', '1 ≤ s.length ≤ 10⁴'],
-    starterCode: `function isValid(s) {\n  // Write your code here\n  \n}`,
+    starterCode: {
+      python: `def isValid(s):
+    """
+    :type s: str
+    :rtype: bool
+    """
+    # Write your code here
+    pass`,
+      cpp: `class Solution {
+public:
+    bool isValid(string s) {
+        // Write your code here
+        
+    }
+};`,
+      java: `class Solution {
+    public boolean isValid(String s) {
+        // Write your code here
+        
+    }
+}`
+    },
     testCases: [{ input: '"{[()]}"', expectedOutput: 'true' }],
     completed: false
   },
@@ -56,11 +142,33 @@ export const problems: Problem[] = [
     title: 'Merge Two Sorted Arrays',
     difficulty: 'basic',
     topic: 'data-structures',
-    premium: false, // FREE
+    premium: false,
     description: 'Merge two sorted arrays into one sorted array.',
     examples: [{ input: '[1,3,5], [2,4,6]', output: '[1,2,3,4,5,6]' }],
     constraints: ['Both arrays sorted', 'O(m+n) time'],
-    starterCode: `function merge(nums1, nums2) {\n  // Write your code here\n  \n}`,
+    starterCode: {
+      python: `def merge(nums1, nums2):
+    """
+    :type nums1: List[int]
+    :type nums2: List[int]
+    :rtype: List[int]
+    """
+    # Write your code here
+    pass`,
+      cpp: `class Solution {
+public:
+    vector<int> merge(vector<int>& nums1, vector<int>& nums2) {
+        // Write your code here
+        
+    }
+};`,
+      java: `class Solution {
+    public int[] merge(int[] nums1, int[] nums2) {
+        // Write your code here
+        
+    }
+}`
+    },
     testCases: [{ input: '[1,3,5], [2,4,6]', expectedOutput: '[1,2,3,4,5,6]' }],
     completed: false
   },
@@ -69,11 +177,11 @@ export const problems: Problem[] = [
     title: 'Remove Duplicates from Sorted Array',
     difficulty: 'basic',
     topic: 'data-structures',
-    premium: true, // PREMIUM
+    premium: true,
     description: 'Remove duplicates in-place and return new length.',
     examples: [{ input: '[1,1,2]', output: '2' }],
     constraints: ['In-place with O(1) space'],
-    starterCode: `function removeDuplicates(nums) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'removeDuplicates'),
     testCases: [{ input: '[1,1,2]', expectedOutput: '2' }],
     completed: false
   },
@@ -82,11 +190,11 @@ export const problems: Problem[] = [
     title: 'First Unique Element',
     difficulty: 'basic',
     topic: 'data-structures',
-    premium: true, // PREMIUM
+    premium: true,
     description: 'Find first element that appears exactly once.',
     examples: [{ input: '[4,5,1,2,0,4]', output: '5' }],
     constraints: ['Use hashmap for O(n)'],
-    starterCode: `function firstUnique(nums) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'firstUnique'),
     testCases: [{ input: '[4,5,1,2,0,4]', expectedOutput: '5' }],
     completed: false
   },
@@ -95,11 +203,11 @@ export const problems: Problem[] = [
     title: 'Majority Element',
     difficulty: 'basic',
     topic: 'data-structures',
-    premium: true, // PREMIUM
+    premium: true,
     description: 'Find element appearing more than n/2 times.',
     examples: [{ input: '[2,2,1,1,1,2,2]', output: '2' }],
     constraints: ['Boyer-Moore Algorithm'],
-    starterCode: `function majorityElement(nums) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'majorityElement'),
     testCases: [{ input: '[2,2,1,1,1,2,2]', expectedOutput: '2' }],
     completed: false
   },
@@ -108,11 +216,11 @@ export const problems: Problem[] = [
     title: 'Rotate Array',
     difficulty: 'medium',
     topic: 'data-structures',
-    premium: true, // PREMIUM
+    premium: true,
     description: 'Rotate array right by k steps in-place.',
     examples: [{ input: '[1,2,3,4,5], k=2', output: '[4,5,1,2,3]' }],
     constraints: ['O(1) space', 'Three reversal method'],
-    starterCode: `function rotate(nums, k) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'rotate'),
     testCases: [{ input: '[1,2,3,4,5], 2', expectedOutput: '[4,5,1,2,3]' }],
     completed: false
   },
@@ -121,11 +229,37 @@ export const problems: Problem[] = [
     title: 'Min Stack',
     difficulty: 'medium',
     topic: 'data-structures',
-    premium: true, // PREMIUM
+    premium: true,
     description: 'Stack with getMin in O(1).',
     examples: [{ input: 'push(2), push(0), getMin()', output: '0' }],
     constraints: ['All ops O(1)'],
-    starterCode: `class MinStack {\n  constructor() {}\n  push(val) {}\n  pop() {}\n  getMin() {}\n}`,
+    starterCode: {
+      python: `class MinStack:
+    def __init__(self):
+        pass
+    
+    def push(self, val):
+        pass
+    
+    def pop(self):
+        pass
+    
+    def getMin(self):
+        pass`,
+      cpp: `class MinStack {
+public:
+    MinStack() {}
+    void push(int val) {}
+    void pop() {}
+    int getMin() {}
+};`,
+      java: `class MinStack {
+    public MinStack() {}
+    public void push(int val) {}
+    public void pop() {}
+    public int getMin() {}
+}`
+    },
     testCases: [{ input: 'push(2), push(0), getMin()', expectedOutput: '0' }],
     completed: false
   },
@@ -134,11 +268,32 @@ export const problems: Problem[] = [
     title: 'LRU Cache',
     difficulty: 'medium',
     topic: 'data-structures',
-    premium: true, // PREMIUM
+    premium: true,
     description: 'Implement LRU cache with O(1) get and put.',
     examples: [{ input: 'put(1,1), get(1)', output: '1' }],
     constraints: ['Doubly linked list + hashmap'],
-    starterCode: `class LRUCache {\n  constructor(capacity) {}\n  get(key) {}\n  put(key, value) {}\n}`,
+    starterCode: {
+      python: `class LRUCache:
+    def __init__(self, capacity):
+        pass
+    
+    def get(self, key):
+        pass
+    
+    def put(self, key, value):
+        pass`,
+      cpp: `class LRUCache {
+public:
+    LRUCache(int capacity) {}
+    int get(int key) {}
+    void put(int key, int value) {}
+};`,
+      java: `class LRUCache {
+    public LRUCache(int capacity) {}
+    public int get(int key) {}
+    public void put(int key, int value) {}
+}`
+    },
     testCases: [{ input: 'capacity=2, get(1)', expectedOutput: '-1' }],
     completed: false
   },
@@ -147,11 +302,11 @@ export const problems: Problem[] = [
     title: 'Top K Frequent Elements',
     difficulty: 'medium',
     topic: 'data-structures',
-    premium: true, // PREMIUM
+    premium: true,
     description: 'Return k most frequent elements.',
     examples: [{ input: '[1,1,1,2,2,3], k=2', output: '[1,2]' }],
     constraints: ['Better than O(n log n)', 'Bucket sort'],
-    starterCode: `function topKFrequent(nums, k) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'topKFrequent'),
     testCases: [{ input: '[1,1,1,2,2,3], 2', expectedOutput: '[1,2]' }],
     completed: false
   },
@@ -160,11 +315,11 @@ export const problems: Problem[] = [
     title: 'Product Except Self',
     difficulty: 'medium',
     topic: 'data-structures',
-    premium: true, // PREMIUM
+    premium: true,
     description: 'Return array where output[i] equals product of all except nums[i].',
     examples: [{ input: '[1,2,3,4]', output: '[24,12,8,6]' }],
     constraints: ['No division', 'O(1) space'],
-    starterCode: `function productExceptSelf(nums) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'productExceptSelf'),
     testCases: [{ input: '[1,2,3,4]', expectedOutput: '[24,12,8,6]' }],
     completed: false
   },
@@ -173,11 +328,11 @@ export const problems: Problem[] = [
     title: 'Longest Consecutive Sequence',
     difficulty: 'medium',
     topic: 'data-structures',
-    premium: true, // PREMIUM
+    premium: true,
     description: 'Find length of longest consecutive sequence.',
     examples: [{ input: '[100,4,200,1,3,2]', output: '4' }],
     constraints: ['O(n) time', 'Use HashSet'],
-    starterCode: `function longestConsecutive(nums) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'longestConsecutive'),
     testCases: [{ input: '[100,4,200,1,3,2]', expectedOutput: '4' }],
     completed: false
   },
@@ -186,11 +341,11 @@ export const problems: Problem[] = [
     title: 'Group Anagrams',
     difficulty: 'medium',
     topic: 'data-structures',
-    premium: true, // PREMIUM
+    premium: true,
     description: 'Group strings that are anagrams.',
     examples: [{ input: '["eat","tea","tan"]', output: '[["eat","tea"],["tan"]]' }],
     constraints: ['Use sorted key'],
-    starterCode: `function groupAnagrams(strs) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'groupAnagrams'),
     testCases: [{ input: '["eat","tea","tan"]', expectedOutput: '[["eat","tea"],["tan"]]' }],
     completed: false
   },
@@ -199,11 +354,11 @@ export const problems: Problem[] = [
     title: 'Sliding Window Maximum',
     difficulty: 'hard',
     topic: 'data-structures',
-    premium: true, // PREMIUM
+    premium: true,
     description: 'Find max in each window of size k.',
     examples: [{ input: '[1,3,-1,-3,5], k=3', output: '[3,3,5]' }],
     constraints: ['Use deque', 'O(n) time'],
-    starterCode: `function maxSlidingWindow(nums, k) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'maxSlidingWindow'),
     testCases: [{ input: '[1,3,-1,-3,5], 3', expectedOutput: '[3,3,5]' }],
     completed: false
   },
@@ -212,11 +367,11 @@ export const problems: Problem[] = [
     title: 'Trapping Rain Water',
     difficulty: 'hard',
     topic: 'data-structures',
-    premium: true, // PREMIUM
+    premium: true,
     description: 'Calculate how much water can be trapped.',
     examples: [{ input: '[0,1,0,2,1,0,1,3,2,1,2,1]', output: '6' }],
     constraints: ['Two pointer approach', 'O(n) time'],
-    starterCode: `function trap(height) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'trap'),
     testCases: [{ input: '[0,1,0,2,1,0,1,3,2,1,2,1]', expectedOutput: '6' }],
     completed: false
   },
@@ -229,11 +384,51 @@ export const problems: Problem[] = [
     title: 'Maximum Depth',
     difficulty: 'basic',
     topic: 'trees',
-    premium: false, // FREE
+    premium: false,
     description: 'Return maximum depth of binary tree.',
     examples: [{ input: '[3,9,20,null,null,15,7]', output: '3' }],
     constraints: ['Nodes: [0, 10^4]'],
-    starterCode: `function maxDepth(root) {\n  // Write your code here\n  \n}`,
+    starterCode: {
+      python: `# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+
+def maxDepth(root):
+    # Write your code here
+    pass`,
+      cpp: `/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ * };
+ */
+class Solution {
+public:
+    int maxDepth(TreeNode* root) {
+        // Write your code here
+        
+    }
+};`,
+      java: `/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ * }
+ */
+class Solution {
+    public int maxDepth(TreeNode root) {
+        // Write your code here
+        
+    }
+}`
+    },
     testCases: [{ input: '[3,9,20,null,null,15,7]', expectedOutput: '3' }],
     completed: false
   },
@@ -242,11 +437,28 @@ export const problems: Problem[] = [
     title: 'Symmetric Tree',
     difficulty: 'basic',
     topic: 'trees',
-    premium: false, // FREE
+    premium: false,
     description: 'Check if tree is symmetric.',
     examples: [{ input: '[1,2,2,3,4,4,3]', output: 'true' }],
     constraints: ['Mirror check required'],
-    starterCode: `function isSymmetric(root) {\n  // Write your code here\n  \n}`,
+    starterCode: {
+      python: `def isSymmetric(root):
+    # Write your code here
+    pass`,
+      cpp: `class Solution {
+public:
+    bool isSymmetric(TreeNode* root) {
+        // Write your code here
+        
+    }
+};`,
+      java: `class Solution {
+    public boolean isSymmetric(TreeNode root) {
+        // Write your code here
+        
+    }
+}`
+    },
     testCases: [{ input: '[1,2,2,3,4,4,3]', expectedOutput: 'true' }],
     completed: false
   },
@@ -255,11 +467,28 @@ export const problems: Problem[] = [
     title: 'Invert Binary Tree',
     difficulty: 'basic',
     topic: 'trees',
-    premium: false, // FREE
+    premium: false,
     description: 'Invert a binary tree (swap left and right).',
     examples: [{ input: '[4,2,7,1,3,6,9]', output: '[4,7,2,9,6,3,1]' }],
     constraints: ['Can do recursively or iteratively'],
-    starterCode: `function invertTree(root) {\n  // Write your code here\n  \n}`,
+    starterCode: {
+      python: `def invertTree(root):
+    # Write your code here
+    pass`,
+      cpp: `class Solution {
+public:
+    TreeNode* invertTree(TreeNode* root) {
+        // Write your code here
+        
+    }
+};`,
+      java: `class Solution {
+    public TreeNode invertTree(TreeNode root) {
+        // Write your code here
+        
+    }
+}`
+    },
     testCases: [{ input: '[4,2,7,1,3,6,9]', expectedOutput: '[4,7,2,9,6,3,1]' }],
     completed: false
   },
@@ -268,11 +497,28 @@ export const problems: Problem[] = [
     title: 'Path Sum',
     difficulty: 'basic',
     topic: 'trees',
-    premium: false, // FREE
+    premium: false,
     description: 'Check if root-to-leaf path with given sum exists.',
     examples: [{ input: '[5,4,8,11,null,13,4], 22', output: 'true' }],
     constraints: ['DFS traversal'],
-    starterCode: `function hasPathSum(root, targetSum) {\n  // Write your code here\n  \n}`,
+    starterCode: {
+      python: `def hasPathSum(root, targetSum):
+    # Write your code here
+    pass`,
+      cpp: `class Solution {
+public:
+    bool hasPathSum(TreeNode* root, int targetSum) {
+        // Write your code here
+        
+    }
+};`,
+      java: `class Solution {
+    public boolean hasPathSum(TreeNode root, int targetSum) {
+        // Write your code here
+        
+    }
+}`
+    },
     testCases: [{ input: '[5,4,8,11,null,13,4], 22', expectedOutput: 'true' }],
     completed: false
   },
@@ -281,11 +527,28 @@ export const problems: Problem[] = [
     title: 'Same Tree',
     difficulty: 'basic',
     topic: 'trees',
-    premium: false, // FREE
+    premium: false,
     description: 'Check if two trees are identical.',
     examples: [{ input: '[1,2,3], [1,2,3]', output: 'true' }],
     constraints: ['Compare structure and values'],
-    starterCode: `function isSameTree(p, q) {\n  // Write your code here\n  \n}`,
+    starterCode: {
+      python: `def isSameTree(p, q):
+    # Write your code here
+    pass`,
+      cpp: `class Solution {
+public:
+    bool isSameTree(TreeNode* p, TreeNode* q) {
+        // Write your code here
+        
+    }
+};`,
+      java: `class Solution {
+    public boolean isSameTree(TreeNode p, TreeNode q) {
+        // Write your code here
+        
+    }
+}`
+    },
     testCases: [{ input: '[1,2,3], [1,2,3]', expectedOutput: 'true' }],
     completed: false
   },
@@ -294,11 +557,28 @@ export const problems: Problem[] = [
     title: 'Level Order Traversal',
     difficulty: 'medium',
     topic: 'trees',
-    premium: false, // FREE
+    premium: false,
     description: 'Return level order traversal (BFS).',
     examples: [{ input: '[3,9,20,null,null,15,7]', output: '[[3],[9,20],[15,7]]' }],
     constraints: ['Use queue for BFS'],
-    starterCode: `function levelOrder(root) {\n  // Write your code here\n  \n}`,
+    starterCode: {
+      python: `def levelOrder(root):
+    # Write your code here
+    pass`,
+      cpp: `class Solution {
+public:
+    vector<vector<int>> levelOrder(TreeNode* root) {
+        // Write your code here
+        
+    }
+};`,
+      java: `class Solution {
+    public List<List<Integer>> levelOrder(TreeNode root) {
+        // Write your code here
+        
+    }
+}`
+    },
     testCases: [{ input: '[3,9,20,null,null,15,7]', expectedOutput: '[[3],[9,20],[15,7]]' }],
     completed: false
   },
@@ -307,11 +587,28 @@ export const problems: Problem[] = [
     title: 'Lowest Common Ancestor',
     difficulty: 'medium',
     topic: 'trees',
-    premium: false, // FREE
+    premium: false,
     description: 'Find LCA of two nodes.',
     examples: [{ input: '[3,5,1,6,2,0,8], 5, 1', output: '3' }],
     constraints: ['All values unique'],
-    starterCode: `function lowestCommonAncestor(root, p, q) {\n  // Write your code here\n  \n}`,
+    starterCode: {
+      python: `def lowestCommonAncestor(root, p, q):
+    # Write your code here
+    pass`,
+      cpp: `class Solution {
+public:
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        // Write your code here
+        
+    }
+};`,
+      java: `class Solution {
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        // Write your code here
+        
+    }
+}`
+    },
     testCases: [{ input: '[3,5,1,6,2,0,8], 5, 1', expectedOutput: '3' }],
     completed: false
   },
@@ -320,11 +617,28 @@ export const problems: Problem[] = [
     title: 'Right Side View',
     difficulty: 'medium',
     topic: 'trees',
-    premium: false, // FREE
+    premium: false,
     description: 'Return nodes visible from right.',
     examples: [{ input: '[1,2,3,null,5,null,4]', output: '[1,3,4]' }],
     constraints: ['BFS or DFS'],
-    starterCode: `function rightSideView(root) {\n  // Write your code here\n  \n}`,
+    starterCode: {
+      python: `def rightSideView(root):
+    # Write your code here
+    pass`,
+      cpp: `class Solution {
+public:
+    vector<int> rightSideView(TreeNode* root) {
+        // Write your code here
+        
+    }
+};`,
+      java: `class Solution {
+    public List<Integer> rightSideView(TreeNode root) {
+        // Write your code here
+        
+    }
+}`
+    },
     testCases: [{ input: '[1,2,3,null,5,null,4]', expectedOutput: '[1,3,4]' }],
     completed: false
   },
@@ -333,11 +647,11 @@ export const problems: Problem[] = [
     title: 'Zigzag Level Order',
     difficulty: 'medium',
     topic: 'trees',
-    premium: true, // PREMIUM
+    premium: true,
     description: 'Zigzag level order traversal.',
     examples: [{ input: '[3,9,20,null,null,15,7]', output: '[[3],[20,9],[15,7]]' }],
     constraints: ['Alternate direction each level'],
-    starterCode: `function zigzagLevelOrder(root) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'zigzagLevelOrder'),
     testCases: [{ input: '[3,9,20,null,null,15,7]', expectedOutput: '[[3],[20,9],[15,7]]' }],
     completed: false
   },
@@ -346,11 +660,26 @@ export const problems: Problem[] = [
     title: 'Serialize Deserialize Tree',
     difficulty: 'hard',
     topic: 'trees',
-    premium: true, // PREMIUM
+    premium: true,
     description: 'Serialize and deserialize binary tree.',
     examples: [{ input: '[1,2,3,null,null,4,5]', output: '"1,2,N,N,3,4,N,N,5,N,N"' }],
     constraints: ['String encoding'],
-    starterCode: `function serialize(root) {}\nfunction deserialize(data) {}`,
+    starterCode: {
+      python: `def serialize(root):
+    pass
+
+def deserialize(data):
+    pass`,
+      cpp: `class Codec {
+public:
+    string serialize(TreeNode* root) {}
+    TreeNode* deserialize(string data) {}
+};`,
+      java: `public class Codec {
+    public String serialize(TreeNode root) {}
+    public TreeNode deserialize(String data) {}
+}`
+    },
     testCases: [{ input: '[1,2,3,null,null,4,5]', expectedOutput: '[1,2,3,null,null,4,5]' }],
     completed: false
   },
@@ -359,11 +688,11 @@ export const problems: Problem[] = [
     title: 'Maximum Path Sum',
     difficulty: 'hard',
     topic: 'trees',
-    premium: true, // PREMIUM
+    premium: true,
     description: 'Find maximum path sum in tree.',
     examples: [{ input: '[1,2,3]', output: '6' }],
     constraints: ['Path can start and end anywhere'],
-    starterCode: `function maxPathSum(root) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'maxPathSum'),
     testCases: [{ input: '[1,2,3]', expectedOutput: '6' }],
     completed: false
   },
@@ -372,11 +701,11 @@ export const problems: Problem[] = [
     title: 'Binary Tree Cameras',
     difficulty: 'hard',
     topic: 'trees',
-    premium: true, // PREMIUM
+    premium: true,
     description: 'Minimum cameras to monitor all nodes.',
     examples: [{ input: '[0,0,null,0,0]', output: '1' }],
     constraints: ['Greedy + DFS'],
-    starterCode: `function minCameraCover(root) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'minCameraCover'),
     testCases: [{ input: '[0,0,null,0,0]', expectedOutput: '1' }],
     completed: false
   },
@@ -389,11 +718,28 @@ export const problems: Problem[] = [
     title: 'Search in BST',
     difficulty: 'basic',
     topic: 'bst',
-    premium: false, // FREE
+    premium: false,
     description: 'Find node with given value in BST.',
     examples: [{ input: '[4,2,7,1,3], 2', output: '[2,1,3]' }],
     constraints: ['BST property: left < root < right'],
-    starterCode: `function searchBST(root, val) {\n  // Write your code here\n  \n}`,
+    starterCode: {
+      python: `def searchBST(root, val):
+    # Write your code here
+    pass`,
+      cpp: `class Solution {
+public:
+    TreeNode* searchBST(TreeNode* root, int val) {
+        // Write your code here
+        
+    }
+};`,
+      java: `class Solution {
+    public TreeNode searchBST(TreeNode root, int val) {
+        // Write your code here
+        
+    }
+}`
+    },
     testCases: [{ input: '[4,2,7,1,3], 2', expectedOutput: '[2,1,3]' }],
     completed: false
   },
@@ -402,11 +748,28 @@ export const problems: Problem[] = [
     title: 'Insert into BST',
     difficulty: 'basic',
     topic: 'bst',
-    premium: false, // FREE
+    premium: false,
     description: 'Insert value into BST.',
     examples: [{ input: '[4,2,7,1,3], 5', output: '[4,2,7,1,3,5]' }],
     constraints: ['Maintain BST property'],
-    starterCode: `function insertIntoBST(root, val) {\n  // Write your code here\n  \n}`,
+    starterCode: {
+      python: `def insertIntoBST(root, val):
+    # Write your code here
+    pass`,
+      cpp: `class Solution {
+public:
+    TreeNode* insertIntoBST(TreeNode* root, int val) {
+        // Write your code here
+        
+    }
+};`,
+      java: `class Solution {
+    public TreeNode insertIntoBST(TreeNode root, int val) {
+        // Write your code here
+        
+    }
+}`
+    },
     testCases: [{ input: '[4,2,7,1,3], 5', expectedOutput: '[4,2,7,1,3,5]' }],
     completed: false
   },
@@ -415,11 +778,28 @@ export const problems: Problem[] = [
     title: 'Validate BST',
     difficulty: 'medium',
     topic: 'bst',
-    premium: false, // FREE
+    premium: false,
     description: 'Check if tree is valid BST.',
     examples: [{ input: '[2,1,3]', output: 'true' }],
     constraints: ['Check all subtrees'],
-    starterCode: `function isValidBST(root) {\n  // Write your code here\n  \n}`,
+    starterCode: {
+      python: `def isValidBST(root):
+    # Write your code here
+    pass`,
+      cpp: `class Solution {
+public:
+    bool isValidBST(TreeNode* root) {
+        // Write your code here
+        
+    }
+};`,
+      java: `class Solution {
+    public boolean isValidBST(TreeNode root) {
+        // Write your code here
+        
+    }
+}`
+    },
     testCases: [{ input: '[2,1,3]', expectedOutput: 'true' }],
     completed: false
   },
@@ -428,11 +808,28 @@ export const problems: Problem[] = [
     title: 'Kth Smallest Element',
     difficulty: 'medium',
     topic: 'bst',
-    premium: false, // FREE
+    premium: false,
     description: 'Find kth smallest in BST.',
     examples: [{ input: '[3,1,4,null,2], 1', output: '1' }],
     constraints: ['Inorder traversal'],
-    starterCode: `function kthSmallest(root, k) {\n  // Write your code here\n  \n}`,
+    starterCode: {
+      python: `def kthSmallest(root, k):
+    # Write your code here
+    pass`,
+      cpp: `class Solution {
+public:
+    int kthSmallest(TreeNode* root, int k) {
+        // Write your code here
+        
+    }
+};`,
+      java: `class Solution {
+    public int kthSmallest(TreeNode root, int k) {
+        // Write your code here
+        
+    }
+}`
+    },
     testCases: [{ input: '[3,1,4,null,2], 1', expectedOutput: '1' }],
     completed: false
   },
@@ -441,11 +838,28 @@ export const problems: Problem[] = [
     title: 'Sorted Array to BST',
     difficulty: 'basic',
     topic: 'bst',
-    premium: false, // FREE
+    premium: false,
     description: 'Convert sorted array to balanced BST.',
     examples: [{ input: '[-10,-3,0,5,9]', output: '[0,-3,9,-10,null,5]' }],
     constraints: ['Height balanced'],
-    starterCode: `function sortedArrayToBST(nums) {\n  // Write your code here\n  \n}`,
+    starterCode: {
+      python: `def sortedArrayToBST(nums):
+    # Write your code here
+    pass`,
+      cpp: `class Solution {
+public:
+    TreeNode* sortedArrayToBST(vector<int>& nums) {
+        // Write your code here
+        
+    }
+};`,
+      java: `class Solution {
+    public TreeNode sortedArrayToBST(int[] nums) {
+        // Write your code here
+        
+    }
+}`
+    },
     testCases: [{ input: '[-10,-3,0,5,9]', expectedOutput: '[0,-3,9,-10,null,5]' }],
     completed: false
   },
@@ -454,11 +868,11 @@ export const problems: Problem[] = [
     title: 'Delete Node in BST',
     difficulty: 'medium',
     topic: 'bst',
-    premium: true, // PREMIUM
+    premium: true,
     description: 'Delete node from BST.',
     examples: [{ input: '[5,3,6,2,4,null,7], 3', output: '[5,4,6,2,null,null,7]' }],
     constraints: ['Handle 3 cases: leaf, one child, two children'],
-    starterCode: `function deleteNode(root, key) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'deleteNode'),
     testCases: [{ input: '[5,3,6,2,4,null,7], 3', expectedOutput: '[5,4,6,2,null,null,7]' }],
     completed: false
   },
@@ -467,11 +881,11 @@ export const problems: Problem[] = [
     title: 'BST to Greater Tree',
     difficulty: 'medium',
     topic: 'bst',
-    premium: true, // PREMIUM
+    premium: true,
     description: 'Convert BST where each node equals original plus sum of greater values.',
     examples: [{ input: '[4,1,6,0,2,5,7]', output: '[30,36,21,36,35,26,15]' }],
     constraints: ['Reverse inorder traversal'],
-    starterCode: `function convertBST(root) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'convertBST'),
     testCases: [{ input: '[4,1,6,0,2,5,7]', expectedOutput: '[30,36,21,36,35,26,15]' }],
     completed: false
   },
@@ -480,11 +894,11 @@ export const problems: Problem[] = [
     title: 'Recover BST',
     difficulty: 'hard',
     topic: 'bst',
-    premium: true, // PREMIUM
+    premium: true,
     description: 'Recover BST where two nodes are swapped.',
     examples: [{ input: '[3,1,4,null,null,2]', output: '[2,1,4,null,null,3]' }],
     constraints: ['Find swapped nodes', 'O(1) space preferred'],
-    starterCode: `function recoverTree(root) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'recoverTree'),
     testCases: [{ input: '[3,1,4,null,null,2]', expectedOutput: '[2,1,4,null,null,3]' }],
     completed: false
   },
@@ -497,11 +911,28 @@ export const problems: Problem[] = [
     title: 'Number of Islands',
     difficulty: 'basic',
     topic: 'graphs',
-    premium: false, // FREE
+    premium: false,
     description: 'Count islands in 2D grid.',
     examples: [{ input: '[["1","1","0"],["1","1","0"],["0","0","1"]]', output: '2' }],
     constraints: ['DFS or BFS', 'm, n in [1, 300]'],
-    starterCode: `function numIslands(grid) {\n  // Write your code here\n  \n}`,
+    starterCode: {
+      python: `def numIslands(grid):
+    # Write your code here
+    pass`,
+      cpp: `class Solution {
+public:
+    int numIslands(vector<vector<char>>& grid) {
+        // Write your code here
+        
+    }
+};`,
+      java: `class Solution {
+    public int numIslands(char[][] grid) {
+        // Write your code here
+        
+    }
+}`
+    },
     testCases: [{ input: '[["1","1","0"],["1","1","0"],["0","0","1"]]', expectedOutput: '2' }],
     completed: false
   },
@@ -510,11 +941,11 @@ export const problems: Problem[] = [
     title: 'Clone Graph',
     difficulty: 'basic',
     topic: 'graphs',
-    premium: false, // FREE
+    premium: false,
     description: 'Deep copy of undirected graph.',
     examples: [{ input: '[[2,4],[1,3],[2,4],[1,3]]', output: '[[2,4],[1,3],[2,4],[1,3]]' }],
     constraints: ['Use HashMap', 'Nodes: [0, 100]'],
-    starterCode: `function cloneGraph(node) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'cloneGraph'),
     testCases: [{ input: '[[2,4],[1,3],[2,4],[1,3]]', expectedOutput: '[[2,4],[1,3],[2,4],[1,3]]' }],
     completed: false
   },
@@ -523,11 +954,11 @@ export const problems: Problem[] = [
     title: 'Valid Path Exists',
     difficulty: 'basic',
     topic: 'graphs',
-    premium: false, // FREE
+    premium: false,
     description: 'Check if path exists from source to destination.',
     examples: [{ input: 'n=3, edges=[[0,1],[1,2],[2,0]], source=0, dest=2', output: 'true' }],
     constraints: ['Union Find or DFS'],
-    starterCode: `function validPath(n, edges, source, destination) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'validPath'),
     testCases: [{ input: '3, [[0,1],[1,2],[2,0]], 0, 2', expectedOutput: 'true' }],
     completed: false
   },
@@ -536,11 +967,11 @@ export const problems: Problem[] = [
     title: 'All Paths Source to Target',
     difficulty: 'basic',
     topic: 'graphs',
-    premium: false, // FREE
+    premium: false,
     description: 'Find all paths from 0 to n-1.',
     examples: [{ input: '[[1,2],[3],[3],[]]', output: '[[0,1,3],[0,2,3]]' }],
     constraints: ['Backtracking', 'n in [2, 15]'],
-    starterCode: `function allPathsSourceTarget(graph) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'allPathsSourceTarget'),
     testCases: [{ input: '[[1,2],[3],[3],[]]', expectedOutput: '[[0,1,3],[0,2,3]]' }],
     completed: false
   },
@@ -549,11 +980,11 @@ export const problems: Problem[] = [
     title: 'Course Schedule',
     difficulty: 'medium',
     topic: 'graphs',
-    premium: false, // FREE
+    premium: false,
     description: 'Check if you can finish all courses (detect cycle).',
     examples: [{ input: 'numCourses=2, prerequisites=[[1,0]]', output: 'true' }],
     constraints: ['Topological sort', 'DFS cycle detection'],
-    starterCode: `function canFinish(numCourses, prerequisites) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'canFinish'),
     testCases: [{ input: '2, [[1,0]]', expectedOutput: 'true' }],
     completed: false
   },
@@ -562,11 +993,11 @@ export const problems: Problem[] = [
     title: 'Number of Provinces',
     difficulty: 'medium',
     topic: 'graphs',
-    premium: false, // FREE
+    premium: false,
     description: 'Find number of connected components.',
     examples: [{ input: '[[1,1,0],[1,1,0],[0,0,1]]', output: '2' }],
     constraints: ['Union Find or DFS'],
-    starterCode: `function findCircleNum(isConnected) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'findCircleNum'),
     testCases: [{ input: '[[1,1,0],[1,1,0],[0,0,1]]', expectedOutput: '2' }],
     completed: false
   },
@@ -575,11 +1006,11 @@ export const problems: Problem[] = [
     title: 'Surrounded Regions',
     difficulty: 'medium',
     topic: 'graphs',
-    premium: false, // FREE
+    premium: false,
     description: 'Flip all O\'s surrounded by X.',
     examples: [{ input: '[["X","X","X"],["X","O","X"],["X","X","X"]]', output: '[["X","X","X"],["X","X","X"],["X","X","X"]]' }],
     constraints: ['DFS from borders'],
-    starterCode: `function solve(board) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'solve'),
     testCases: [{ input: '[["X","X","X"],["X","O","X"],["X","X","X"]]', expectedOutput: '[["X","X","X"],["X","X","X"],["X","X","X"]]' }],
     completed: false
   },
@@ -588,11 +1019,11 @@ export const problems: Problem[] = [
     title: 'Pacific Atlantic Water Flow',
     difficulty: 'medium',
     topic: 'graphs',
-    premium: false, // FREE
+    premium: false,
     description: 'Find cells where water flows to both oceans.',
     examples: [{ input: '[[1,2,3],[8,9,4],[7,6,5]]', output: '[[0,2],[1,0],[1,1],[1,2],[2,0],[2,1],[2,2]]' }],
     constraints: ['DFS from both oceans'],
-    starterCode: `function pacificAtlantic(heights) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'pacificAtlantic'),
     testCases: [{ input: '[[1,2,3],[8,9,4],[7,6,5]]', expectedOutput: '[[0,2],[1,0],[1,1],[1,2],[2,0],[2,1],[2,2]]' }],
     completed: false
   },
@@ -601,11 +1032,11 @@ export const problems: Problem[] = [
     title: 'Word Ladder',
     difficulty: 'medium',
     topic: 'graphs',
-    premium: false, // FREE
+    premium: false,
     description: 'Shortest transformation sequence.',
     examples: [{ input: 'beginWord="hit", endWord="cog", wordList=["hot","dot","dog","lot","log","cog"]', output: '5' }],
     constraints: ['BFS', 'Word graph'],
-    starterCode: `function ladderLength(beginWord, endWord, wordList) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'ladderLength'),
     testCases: [{ input: '"hit", "cog", ["hot","dot","dog","lot","log","cog"]', expectedOutput: '5' }],
     completed: false
   },
@@ -614,11 +1045,11 @@ export const problems: Problem[] = [
     title: 'Shortest Path in Binary Matrix',
     difficulty: 'medium',
     topic: 'graphs',
-    premium: false, // FREE
+    premium: false,
     description: 'Find shortest path from top-left to bottom-right.',
     examples: [{ input: '[[0,1],[1,0]]', output: '2' }],
     constraints: ['8-directional movement', 'BFS'],
-    starterCode: `function shortestPathBinaryMatrix(grid) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'shortestPathBinaryMatrix'),
     testCases: [{ input: '[[0,1],[1,0]]', expectedOutput: '2' }],
     completed: false
   },
@@ -627,11 +1058,11 @@ export const problems: Problem[] = [
     title: 'Rotting Oranges',
     difficulty: 'medium',
     topic: 'graphs',
-    premium: false, // FREE
+    premium: false,
     description: 'Minimum time for all oranges to rot.',
     examples: [{ input: '[[2,1,1],[1,1,0],[0,1,1]]', output: '4' }],
     constraints: ['Multi-source BFS'],
-    starterCode: `function orangesRotting(grid) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'orangesRotting'),
     testCases: [{ input: '[[2,1,1],[1,1,0],[0,1,1]]', expectedOutput: '4' }],
     completed: false
   },
@@ -640,11 +1071,11 @@ export const problems: Problem[] = [
     title: 'Network Delay Time',
     difficulty: 'medium',
     topic: 'graphs',
-    premium: false, // FREE
+    premium: false,
     description: 'Time for signal to reach all nodes.',
     examples: [{ input: 'times=[[2,1,1],[2,3,1],[3,4,1]], n=4, k=2', output: '2' }],
     constraints: ['Dijkstra\'s algorithm', 'Weighted graph'],
-    starterCode: `function networkDelayTime(times, n, k) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'networkDelayTime'),
     testCases: [{ input: '[[2,1,1],[2,3,1],[3,4,1]], 4, 2', expectedOutput: '2' }],
     completed: false
   },
@@ -657,11 +1088,11 @@ export const problems: Problem[] = [
     title: 'Climbing Stairs',
     difficulty: 'basic',
     topic: 'dp',
-    premium: false, // FREE
+    premium: false,
     description: 'Count ways to climb n stairs (1 or 2 steps).',
     examples: [{ input: '3', output: '3', explanation: '1+1+1, 1+2, 2+1' }],
     constraints: ['1 <= n <= 45', 'Fibonacci pattern'],
-    starterCode: `function climbStairs(n) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'climbStairs'),
     testCases: [{ input: '3', expectedOutput: '3' }],
     completed: false
   },
@@ -670,11 +1101,11 @@ export const problems: Problem[] = [
     title: 'House Robber',
     difficulty: 'basic',
     topic: 'dp',
-    premium: false, // FREE
+    premium: false,
     description: 'Maximum money without robbing adjacent houses.',
     examples: [{ input: '[1,2,3,1]', output: '4', explanation: 'Rob 1 and 3' }],
     constraints: ['Can\'t rob adjacent'],
-    starterCode: `function rob(nums) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'rob'),
     testCases: [{ input: '[1,2,3,1]', expectedOutput: '4' }],
     completed: false
   },
@@ -683,11 +1114,11 @@ export const problems: Problem[] = [
     title: 'Coin Change',
     difficulty: 'medium',
     topic: 'dp',
-    premium: false, // FREE
+    premium: false,
     description: 'Minimum coins to make amount.',
     examples: [{ input: 'coins=[1,2,5], amount=11', output: '3', explanation: '5+5+1' }],
     constraints: ['Return -1 if impossible'],
-    starterCode: `function coinChange(coins, amount) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'coinChange'),
     testCases: [{ input: '[1,2,5], 11', expectedOutput: '3' }],
     completed: false
   },
@@ -696,11 +1127,11 @@ export const problems: Problem[] = [
     title: 'Longest Increasing Subsequence',
     difficulty: 'medium',
     topic: 'dp',
-    premium: false, // FREE
+    premium: false,
     description: 'Length of longest increasing subsequence.',
     examples: [{ input: '[10,9,2,5,3,7,101,18]', output: '4', explanation: '[2,3,7,101]' }],
     constraints: ['O(n log n) solution exists'],
-    starterCode: `function lengthOfLIS(nums) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'lengthOfLIS'),
     testCases: [{ input: '[10,9,2,5,3,7,101,18]', expectedOutput: '4' }],
     completed: false
   },
@@ -709,11 +1140,11 @@ export const problems: Problem[] = [
     title: 'Unique Paths',
     difficulty: 'medium',
     topic: 'dp',
-    premium: false, // FREE
+    premium: false,
     description: 'Count paths in m×n grid (only right/down).',
     examples: [{ input: 'm=3, n=7', output: '28' }],
     constraints: ['Start top-left, end bottom-right'],
-    starterCode: `function uniquePaths(m, n) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'uniquePaths'),
     testCases: [{ input: '3, 7', expectedOutput: '28' }],
     completed: false
   },
@@ -722,11 +1153,11 @@ export const problems: Problem[] = [
     title: 'Longest Common Subsequence',
     difficulty: 'medium',
     topic: 'dp',
-    premium: false, // FREE
+    premium: false,
     description: 'Length of LCS between two strings.',
     examples: [{ input: 'text1="abcde", text2="ace"', output: '3', explanation: '"ace"' }],
     constraints: ['Classic DP problem'],
-    starterCode: `function longestCommonSubsequence(text1, text2) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'longestCommonSubsequence'),
     testCases: [{ input: '"abcde", "ace"', expectedOutput: '3' }],
     completed: false
   },
@@ -735,11 +1166,11 @@ export const problems: Problem[] = [
     title: 'Word Break',
     difficulty: 'medium',
     topic: 'dp',
-    premium: true, // PREMIUM
+    premium: true,
     description: 'Check if string can be segmented into dictionary words.',
     examples: [{ input: 's="leetcode", wordDict=["leet","code"]', output: 'true' }],
     constraints: ['DP with substring checks'],
-    starterCode: `function wordBreak(s, wordDict) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'wordBreak'),
     testCases: [{ input: '"leetcode", ["leet","code"]', expectedOutput: 'true' }],
     completed: false
   },
@@ -748,11 +1179,11 @@ export const problems: Problem[] = [
     title: 'Partition Equal Subset Sum',
     difficulty: 'medium',
     topic: 'dp',
-    premium: true, // PREMIUM
+    premium: true,
     description: 'Check if array can be partitioned into equal sum subsets.',
     examples: [{ input: '[1,5,11,5]', output: 'true', explanation: '[1,5,5] and [11]' }],
     constraints: ['0/1 Knapsack variant'],
-    starterCode: `function canPartition(nums) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'canPartition'),
     testCases: [{ input: '[1,5,11,5]', expectedOutput: 'true' }],
     completed: false
   },
@@ -761,11 +1192,11 @@ export const problems: Problem[] = [
     title: 'Edit Distance',
     difficulty: 'hard',
     topic: 'dp',
-    premium: true, // PREMIUM
+    premium: true,
     description: 'Minimum operations to convert word1 to word2.',
     examples: [{ input: 'word1="horse", word2="ros"', output: '3', explanation: 'horse -> rorse -> rose -> ros' }],
     constraints: ['Insert, delete, replace'],
-    starterCode: `function minDistance(word1, word2) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'minDistance'),
     testCases: [{ input: '"horse", "ros"', expectedOutput: '3' }],
     completed: false
   },
@@ -774,11 +1205,11 @@ export const problems: Problem[] = [
     title: 'Regular Expression Matching',
     difficulty: 'hard',
     topic: 'dp',
-    premium: true, // PREMIUM
+    premium: true,
     description: 'Implement regex matching with . and *.',
     examples: [{ input: 's="aa", p="a*"', output: 'true' }],
     constraints: ['. matches any char', '* matches zero or more'],
-    starterCode: `function isMatch(s, p) {\n  // Write your code here\n  \n}`,
+    starterCode: convertStarterCode('', 'isMatch'),
     testCases: [{ input: '"aa", "a*"', expectedOutput: 'true' }],
     completed: false
   },
