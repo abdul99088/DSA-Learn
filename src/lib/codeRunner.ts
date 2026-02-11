@@ -12,60 +12,65 @@ export async function executeCode(
   code: string,
   testCase: { input: string, expectedOutput: string },
   language: ProgrammingLanguage
-): Promise<{
-  passed: boolean
-  actualOutput: string
-  error?: string
-}> {
+): Promise<{ passed: boolean; actualOutput: string; error?: string }> {
   try {
     const jdoodleConfig = JDOODLE_LANGUAGES[language]
-    const fullCode = wrapCodeWithTestCase(code, testCase.input, language)
+    const functionName = extractFunctionName(code, language)
+    const params = parseInputParams(testCase.input)
+    const isVoid = detectVoid(code, language, functionName)
+
+    let fullScript = ''
+    if (language === 'python') fullScript = wrapPython(code, params, functionName, isVoid)
+    else if (language === 'cpp') fullScript = wrapCpp(code, params, functionName, isVoid)
+    else if (language === 'java') fullScript = wrapJava(code, params, functionName, isVoid)
 
     const response = await fetch('/api/execute', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        script: fullCode,
+        script: fullScript,
         language: jdoodleConfig.language,
         versionIndex: jdoodleConfig.versionIndex
       })
     })
 
-    const result = await response.json()
-    if (!response.ok || result.error) return { passed: false, actualOutput: '', error: `Error: ${result.error || 'Server error'}` }
-    if (result.statusCode && result.statusCode !== 200) return { passed: false, actualOutput: result.output || '', error: `Runtime/Comp Error:\n${result.output}` }
+    const data = await response.json()
+    const actualOutput = (data.output || '').trim()
+    const expected = testCase.expectedOutput.trim()
+    
+    const isCorrect = normalizeOutput(actualOutput) === normalizeOutput(expected)
 
-    const actualOutput = (result.output || '').trim()
-    const passed = normalizeOutput(actualOutput) === normalizeOutput(testCase.expectedOutput)
-
-    return { passed, actualOutput: actualOutput || '(no output)', error: passed ? undefined : 'Output mismatch' }
-  } catch (error: any) {
-    return { passed: false, actualOutput: '', error: `Network Error: ${error.message}` }
+    return {
+      passed: isCorrect,
+      actualOutput: actualOutput || (data.error ? `Error: ${data.error}` : '(no output)'),
+      error: isCorrect ? undefined : (data.error || actualOutput)
+    }
+  } catch (e: any) {
+    return { passed: false, actualOutput: '', error: `Network Error: ${e.message}` }
   }
 }
+
+// ------------------- Helpers -------------------
 
 function normalizeOutput(output: string): string {
-  // Strips all formatting to compare core data values
-  return output.replace(/\s+/g, '').replace(/["']/g, '').replace(/[\[\]\{\}]/g, '').replace(/,$/, '').toLowerCase()
+  return output.replace(/\s+/g, '').replace(/[\[\]"'{} ]/g, '').toLowerCase()
 }
 
-function wrapCodeWithTestCase(code: string, input: string, language: ProgrammingLanguage): string {
-  const functionName = extractMainFunctionName(code, language)
-  if (language === 'python') return generatePythonWrapper(code, input, functionName)
-  if (language === 'cpp') return generateCppWrapper(code, input, functionName)
-  return code
+function extractFunctionName(code: string, lang: string): string {
+  const re = lang === 'python' ? /def\s+(\w+)/ : /(\w+)\s*\(/
+  const match = code.match(re)
+  return match ? match[1] : 'solution'
 }
 
-function extractMainFunctionName(code: string, language: ProgrammingLanguage): string {
-  // Ignores common helper/recursive names to find the primary Solution method
-  const helpers = new Set(['find', 'unite', 'isMirror', 'dfs', 'bfs', 'helper', 'solve', 'build', 'traverse', 'isSameTree']);
-  const functionRegex = /(?:vector<.*?>|int|void|TreeNode\*|ListNode\*|Node\*|string|bool|auto)\s+(\w+)\s*\(/g;
-  const matches = [...code.matchAll(functionRegex)];
-  if (matches.length === 0) return 'solution';
-  for (const match of matches) {
-    if (!helpers.has(match[1])) return match[1];
+function detectVoid(code: string, lang: string, functionName: string): boolean {
+  if (lang === 'python') {
+    const parts = code.split(`def ${functionName}`)
+    if (parts.length < 2) return false
+    const functionBody = parts[1].split('def ')[0]
+    return !functionBody.includes('return ')
   }
-  return matches[matches.length - 1][1];
+  const voidRegex = new RegExp(`void\\s+${functionName}`)
+  return voidRegex.test(code)
 }
 
 function parseInputParams(input: string): string[] {
@@ -73,97 +78,111 @@ function parseInputParams(input: string): string[] {
   let current = '', depth = 0, inString = false
   for (let i = 0; i < input.length; i++) {
     const char = input[i]
-    if (char === '"') inString = !inString
+    if (char === '"' && input[i-1] !== '\\') inString = !inString
     if (!inString) {
       if (char === '[' || char === '{') depth++
       if (char === ']' || char === '}') depth--
     }
     if (char === ',' && depth === 0 && !inString) {
-      params.push(current.trim()); current = ''
+      params.push(current.trim())
+      current = ''
     } else current += char
   }
   if (current.trim()) params.push(current.trim())
   return params
 }
 
-/* ---------------- C++ POWER WRAPPER ---------------- */
+// ------------------- Python Wrapper -------------------
 
-function generateCppWrapper(code: string, input: string, functionName: string): string {
-  const isTree = code.includes('TreeNode');
-  const isList = code.includes('ListNode');
-  const isGraph = code.includes('Node') && !isTree; 
-  const params = parseInputParams(input);
+function wrapPython(code: string, params: string[], fName: string, isVoid: boolean) {
+  const hasTreeNode = code.includes("TreeNode")
+  const hasListNode = code.includes("ListNode")
+  
+  return `
+import json, collections
+from typing import List, Optional
 
-  const dataStructures = `
-struct TreeNode {
-    int val; TreeNode *left, *right;
-    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
-};
-struct ListNode {
-    int val; ListNode *next;
-    ListNode(int x) : val(x), next(nullptr) {}
-};
-class Node {
-public:
-    int val; vector<Node*> neighbors;
-    Node() : val(0) {}
-    Node(int _val) : val(_val) {}
-};
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val, self.left, self.right = val, left, right
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val, self.next = val, next
 
-TreeNode* buildTree(vector<string> nodes) {
-    if (nodes.empty() || nodes[0] == "null") return nullptr;
-    TreeNode* root = new TreeNode(stoi(nodes[0]));
-    queue<TreeNode*> q; q.push(root);
-    int i = 1;
-    while (!q.empty() && i < (int)nodes.size()) {
-        TreeNode* curr = q.front(); q.pop();
-        if (i < (int)nodes.size() && nodes[i] != "null") {
-            curr->left = new TreeNode(stoi(nodes[i])); q.push(curr->left);
-        }
-        i++;
-        if (i < (int)nodes.size() && nodes[i] != "null") {
-            curr->right = new TreeNode(stoi(nodes[i])); q.push(curr->right);
-        }
-        i++;
-    }
-    return root;
+def build_tree(nodes):
+    if not nodes or nodes[0] is None: return None
+    root = TreeNode(nodes[0]); q = collections.deque([root]); i = 1
+    while q and i < len(nodes):
+        node = q.popleft()
+        if i < len(nodes) and nodes[i] is not None:
+            node.left = TreeNode(nodes[i]); q.append(node.left)
+        i += 1
+        if i < len(nodes) and nodes[i] is not None:
+            node.right = TreeNode(nodes[i]); q.append(node.right)
+        i += 1
+    return root
+
+def build_list(nodes):
+    dummy = ListNode(0); cur = dummy
+    for v in nodes: cur.next = ListNode(v); cur = cur.next
+    return dummy.next
+
+def serialize(res):
+    if isinstance(res, TreeNode):
+        out, q = [], collections.deque([res])
+        while q:
+            n = q.popleft()
+            if n: out.append(n.val); q.append(n.left); q.append(n.right)
+            else: out.append(None)
+        while out and out[-1] is None: out.pop()
+        return out
+    if isinstance(res, ListNode):
+        out = []
+        while res: out.append(res.val); res = res.next
+        return out
+    return res
+
+${code}
+
+try:
+    sol = Solution()
+    args = [${params.join(',').replace(/null/g, 'None')}]
+    if ${hasTreeNode ? 'True' : 'False'} and len(args) > 0 and isinstance(args[0], list):
+        args[0] = build_tree(args[0])
+    elif ${hasListNode ? 'True' : 'False'} and len(args) > 0 and isinstance(args[0], list):
+        args[0] = build_list(args[0])
+    
+    ret = sol.${fName}(*args)
+    res = args[0] if ${isVoid ? 'True' : 'False'} else ret
+    print(json.dumps(serialize(res)))
+except Exception as e:
+    print(f"Error: {e}")
+`
 }
 
-Node* buildGraph(vector<vector<int>> adj) {
-    if (adj.empty()) return nullptr;
-    vector<Node*> nodes;
-    for (int i = 1; i <= (int)adj.size(); i++) nodes.push_back(new Node(i));
-    for (int i = 0; i < (int)adj.size(); i++) {
-        for (int neighborVal : adj[i]) {
-            nodes[i]->neighbors.push_back(nodes[neighborVal - 1]);
-        }
-    }
-    return nodes[0];
-}
+// ------------------- C++ Wrapper -------------------
 
-void printGraph(Node* node) {
-    if (!node) { cout << "[]"; return; }
-    map<int, vector<int>> adj;
-    queue<Node*> q; q.push(node);
-    while(!q.empty()){
-        Node* curr = q.front(); q.pop();
-        if(adj.count(curr->val)) continue;
-        adj[curr->val] = {};
-        for(Node* n : curr->neighbors) {
-            adj[curr->val].push_back(n->val);
-            q.push(n);
-        }
+function wrapCpp(code: string, params: string[], fName: string, isVoid: boolean) {
+  const hasTreeNode = code.includes("TreeNode")
+  const hasListNode = code.includes("ListNode")
+
+  const argDecls = params.map((p, i) => {
+    let val = p.replace(/\[/g, '{').replace(/\]/g, '}').replace(/null/g, '-999')
+    if (i === 0 && (hasTreeNode || hasListNode)) return `vector<int> raw0 = ${val};`
+    if (p.startsWith('[[')) return p.includes('"') ? `vector<vector<char>> arg${i} = ${val.replace(/"/g, "'")};` : `vector<vector<int>> arg${i} = ${val};`
+    if (p.startsWith('[')) return p.includes('"') ? `vector<char> arg${i} = ${val.replace(/"/g, "'")};` : `vector<int> arg${i} = ${val};`
+    if (p === 'true' || p === 'false') return `bool arg${i} = ${p};`
+    if (p.startsWith('"')) return `string arg${i} = ${p};`
+    return `int arg${i} = ${p};`
+  }).join('\n    ')
+
+  const callArgs = params.map((_, i) => {
+    if (i === 0) {
+      if (hasTreeNode) return "rootT"
+      if (hasListNode) return "headL"
     }
-    cout << "[";
-    for(auto const& [val, neighbors] : adj){
-        cout << "[";
-        for(size_t j=0; j<neighbors.size(); j++)
-            cout << neighbors[j] << (j == neighbors.size()-1 ? "" : ",");
-        cout << "]" << (val == (int)adj.size() ? "" : ",");
-    }
-    cout << "]";
-}
-`;
+    return `arg${i}`
+  }).join(", ")
 
   return `
 #include <iostream>
@@ -172,95 +191,151 @@ void printGraph(Node* node) {
 #include <queue>
 #include <stack>
 #include <unordered_map>
-#include <map>
+#include <unordered_set>
 #include <algorithm>
-#include <numeric>
+#include <climits>
 using namespace std;
-${dataStructures}
-${code}
 
-void printVal(int v) { cout << v; }
-void printVal(bool v) { cout << (v ? "true" : "false"); }
-void printVal(vector<vector<int>> v) {
-    cout << "["; for(size_t i=0; i<v.size(); i++) {
-        cout << "["; for(size_t j=0; j<v[i].size(); j++) cout << v[i][j] << (j==v[i].size()-1?"":",");
-        cout << "]" << (i==v.size()-1?"":",");
-    } cout << "]";
+struct TreeNode { int val; TreeNode *left, *right; TreeNode(int x):val(x),left(nullptr),right(nullptr){} };
+struct ListNode { int val; ListNode *next; ListNode(int x):val(x),next(nullptr){} };
+
+TreeNode* bt(vector<int>& v){
+    if(v.empty() || v[0]==-999) return nullptr;
+    TreeNode* r = new TreeNode(v[0]); queue<TreeNode*> q; q.push(r); int i=1;
+    while(!q.empty() && i<v.size()){
+        TreeNode* c=q.front(); q.pop();
+        if(i<v.size() && v[i]!=-999){ c->left=new TreeNode(v[i]); q.push(c->left); } i++;
+        if(i<v.size() && v[i]!=-999){ c->right=new TreeNode(v[i]); q.push(c->right); } i++;
+    } return r;
+}
+ListNode* bl(vector<int>& v){
+    if(v.empty()) return nullptr;
+    ListNode* h=new ListNode(v[0]), *c=h;
+    for(int i=1;i<v.size();i++){ c->next=new ListNode(v[i]); c=c->next; } return h;
 }
 
-int main() {
+void pr(bool v){ cout<<(v?"true":"false"); }
+void pr(int v){ cout<<v; }
+void pr(string v){ cout<<"\""<<v<<"\""; }
+template<typename T> void pr(const vector<T>& v){
+    cout<<"["; for(size_t i=0;i<v.size();i++){ pr(v[i]); if(i<v.size()-1) cout<<","; } cout<<"]";
+}
+void pr(TreeNode* r){
+    if(!r){ cout<<"[]"; return; }
+    vector<string> res; queue<TreeNode*> q; q.push(r);
+    while(!q.empty()){
+        TreeNode* n=q.front(); q.pop();
+        if(n){ res.push_back(to_string(n->val)); q.push(n->left); q.push(n->right); }
+        else res.push_back("null");
+    }
+    while(!res.empty() && res.back()=="null") res.pop_back();
+    cout<<"["; for(size_t i=0; i<res.size(); i++){ cout<<res[i]; if(i<res.size()-1) cout<<","; } cout<<"]";
+}
+void pr(ListNode* h){
+    cout<<"["; while(h){ cout<<h->val; if(h->next) cout<<","; h=h->next; } cout<<"]";
+}
+
+${code.replace(/#include\s*<.*>/g, '')}
+
+int main(){
     Solution sol;
-    ${params.map((p: string, i: number) => {
-      const trimmed = p.trim();
-      if (isGraph && trimmed.startsWith('[[')) {
-        const cppMatrix = trimmed.replace(/\[/g, '{').replace(/\]/g, '}');
-        return `vector<vector<int>> raw${i} = ${cppMatrix}; Node* p${i} = buildGraph(raw${i});`;
-      }
-      if (trimmed.startsWith('[[')) {
-        // Detect char grids (like numIslands)
-        if (trimmed.includes('"')) {
-            return `vector<vector<char>> p${i} = ${trimmed.replace(/\[/g, '{').replace(/\]/g, '}').replace(/"/g, "'")};`;
-        }
-        return `vector<vector<int>> p${i} = ${trimmed.replace(/\[/g, '{').replace(/\]/g, '}')};`;
-      }
-      if (trimmed.startsWith('[')) {
-          return `vector<int> p${i} = {${trimmed.slice(1, -1)}};`;
-      }
-      return `auto p${i} = ${trimmed};`;
-    }).join('\n    ')}
-
-    ${isGraph ? `auto res = sol.${functionName}(p0); printGraph(res);` :
-      isTree ? `auto res = sol.${functionName}(root); printVal(res);` : 
-      `auto res = sol.${functionName}(${params.map((_, i) => `p${i}`).join(',')}); printVal(res);`}
-    
+    ${argDecls}
+    TreeNode* rootT = ${hasTreeNode ? 'bt(raw0)' : 'nullptr'};
+    ListNode* headL = ${hasListNode ? 'bl(raw0)' : 'nullptr'};
+    ${isVoid ? 
+      `sol.${fName}(${callArgs}); pr(${hasTreeNode ? "rootT" : hasListNode ? "headL" : "arg0"});` :
+      `auto res = sol.${fName}(${callArgs}); pr(res);`
+    }
     return 0;
-}`;
+}
+`
 }
 
-/* ---------------- PYTHON POWER WRAPPER ---------------- */
+// ------------------- Java Wrapper -------------------
 
-function generatePythonWrapper(code: string, input: string, functionName: string): string {
+function wrapJava(code: string, params: string[], fName: string, isVoid: boolean) {
+  const hasTreeNode = code.includes("TreeNode")
+  const hasListNode = code.includes("ListNode")
+
+  const argDecls = params.map((p, i) => {
+    let val = p.replace(/\[/g, '{').replace(/\]/g, '}').replace(/null/g, '-999')
+    if (i === 0 && (hasTreeNode || hasListNode)) return `int[] raw0 = new int[] ${val};`
+    if (p.startsWith('[[')) return p.includes('"') ? `char[][] arg${i} = ${val.replace(/"/g, "'")};` : `int[][] arg${i} = ${val};`
+    if (p.startsWith('[')) return p.includes('"') ? `char[] arg${i} = new char[] ${val.replace(/"/g, "'")};` : `int[] arg${i} = new int[] ${val};`
+    if (p === 'true' || p === 'false') return `boolean arg${i} = ${p};`
+    if (p.startsWith('"')) return `String arg${i} = ${p};`
+    return `int arg${i} = ${p};`
+  }).join('\n        ')
+
+  const callArgs = params.map((_, i) => {
+    if (i === 0) {
+      if (hasTreeNode) return "rootT"
+      if (hasListNode) return "headL"
+    }
+    return `arg${i}`
+  }).join(", ")
+
   return `
-import json
-import collections
+import java.util.*;
 
-class Node:
-    def __init__(self, val=0, neighbors=None):
-        self.val = val
-        self.neighbors = neighbors if neighbors is not None else []
-
-def build_graph(adj):
-    if not adj: return None
-    nodes = [Node(i+1) for i in range(len(adj))]
-    for i, neighbors in enumerate(adj):
-        for n_idx in neighbors:
-            nodes[i].neighbors.append(nodes[n_idx-1])
-    return nodes[0]
-
-def graph_to_list(node):
-    if not node: return []
-    adj_map = {}
-    q = collections.deque([node])
-    while q:
-        curr = q.popleft()
-        if curr.val in adj_map: continue
-        adj_map[curr.val] = [n.val for n in curr.neighbors]
-        for n in curr.neighbors: q.append(n)
-    return [adj_map[v] for v in sorted(adj_map.keys())]
+class TreeNode { int val; TreeNode left, right; TreeNode(int x){val=x;} }
+class ListNode { int val; ListNode next; ListNode(int x){val=x;} }
 
 ${code}
 
-try:
-    raw_input = [${input.replace(/null/g, 'None')}]
-    sol = Solution()
-    if "Node" in """${code}""" and "TreeNode" not in """${code}""":
-        root = build_graph(raw_input[0])
-        result = sol.${functionName}(root)
-        print(json.dumps(graph_to_list(result)))
-    else:
-        result = sol.${functionName}(*raw_input)
-        print(json.dumps(result))
-except Exception as e:
-    print(str(e))
-`;
+public class Main {
+    public static void main(String[] args){
+        try {
+            Solution sol = new Solution();
+            ${argDecls}
+            TreeNode rootT = ${hasTreeNode ? 'bt(raw0)' : 'null'};
+            ListNode headL = ${hasListNode ? 'bl(raw0)' : 'null'};
+            ${isVoid ? 
+              `sol.${fName}(${callArgs}); System.out.print(${hasTreeNode ? "st(rootT)" : hasListNode ? "sl(headL)" : "Arrays.toString(arg0).replace(\" \",\"\")"});` :
+              `Object res = sol.${fName}(${callArgs});
+               if(res instanceof TreeNode) System.out.print(st((TreeNode)res));
+               else if(res instanceof ListNode) System.out.print(sl((ListNode)res));
+               else if(res instanceof int[][]) System.out.print(Arrays.deepToString((int[][])res).replace(" ",""));
+               else if(res instanceof int[]) System.out.print(Arrays.toString((int[])res).replace(" ",""));
+               else if(res instanceof Boolean) System.out.print((boolean)res ? "true" : "false");
+               else System.out.print(res);`
+            }
+        } catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
+        }
+    }
+    static TreeNode bt(int[] n){
+        if(n.length==0 || n[0]==-999) return null;
+        TreeNode r=new TreeNode(n[0]); Queue<TreeNode> q=new LinkedList<>(); q.add(r);
+        int i=1; while(!q.isEmpty() && i<n.length){
+            TreeNode c=q.poll();
+            if(i<n.length && n[i]!=-999){ c.left=new TreeNode(n[i]); q.add(c.left); } i++;
+            if(i<n.length && n[i]!=-999){ c.right=new TreeNode(n[i]); q.add(c.right); } i++;
+        } return r;
+    }
+    static String st(TreeNode r){
+        if(r==null) return "[]";
+        List<String> res=new ArrayList<>(); Queue<TreeNode> q=new LinkedList<>(); q.add(r);
+        while(!q.isEmpty()){
+            TreeNode c=q.poll();
+            if(c!=null){ res.add(String.valueOf(c.val)); q.add(c.left); q.add(c.right); }
+            else res.add("null");
+        }
+        while(!res.isEmpty() && res.get(res.size()-1).equals("null")) res.remove(res.size()-1);
+        return res.toString().replace(" ","");
+    }
+    static String sl(ListNode h){
+        List<Integer> res=new ArrayList<>();
+        while(h!=null){ res.add(h.val); h=h.next; }
+        return res.toString().replace(" ","");
+    }
+    static ListNode bl(int[] n){
+        if(n.length==0) return null;
+        ListNode h=new ListNode(n[0]), c=h;
+        for(int i=1;i<n.length;i++){ c.next=new ListNode(n[i]); c=c.next; } return h;
+    }
 }
+`
+}
+
+

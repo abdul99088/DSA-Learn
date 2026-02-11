@@ -1,6 +1,13 @@
 'use client'
 
-import { BookOpen, Code, GitBranch, Network, Database } from 'lucide-react'
+import { 
+  BookOpen, 
+  Code, 
+  GitBranch, 
+  Network, 
+  Database, 
+  Briefcase // Make sure to import this
+} from 'lucide-react'
 
 export const topics = [
   {
@@ -12,6 +19,15 @@ export const topics = [
       basic: { unlocked: true, completed: false, problems: 15 },
       medium: { unlocked: true, completed: false, problems: 0 },
       hard: { unlocked: false, completed: false, problems: 0 }
+    }
+  },
+  {
+    id: 'interviews',
+    name: 'Interview Prep',
+    icon: Briefcase,
+    description: 'Top questions from Google, Amazon, and Meta',
+    levels: {
+      premium: { unlocked: true, completed: false, problems: 3 } // Start with 3 for now
     }
   },
   {

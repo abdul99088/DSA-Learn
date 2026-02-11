@@ -2,7 +2,9 @@
 
 // Export all types
 export type DifficultyLevel = 'basic' | 'medium' | 'hard'
+export type Level = DifficultyLevel | 'premium'
 export type ProgrammingLanguage = 'python' | 'cpp' | 'java'
+export type Company = 'Google' | 'Amazon' | 'Meta'
 
 export interface TestCase {
   input: string
@@ -24,26 +26,26 @@ export interface StarterCode {
 export interface Problem {
   id: string
   title: string
-  difficulty: DifficultyLevel
+  difficulty?: DifficultyLevel
   topic: string
+  level?: Level
+  company?: Company
   description: string
   premium: boolean
-  examples: Example[]
-  constraints: string[]
+  examples?: Example[]
+  constraints?: string[]
   starterCode: StarterCode
   testCases: TestCase[]
-  completed: boolean
+  completed?: boolean
 }
 
-// Helper function to convert JavaScript starter code to other languages
+// Helper function
 function convertStarterCode(jsCode: string, funcName: string = ''): StarterCode {
-  // Extract function name if not provided
   if (!funcName) {
     const match = jsCode.match(/function\s+(\w+)/)
     funcName = match ? match[1] : 'solution'
   }
 
-  // Basic conversion templates
   return {
     python: `def ${funcName}():
     # Write your code here
@@ -72,6 +74,7 @@ export const problems: Problem[] = [
     id: 'ds-1',
     title: 'Two Sum',
     difficulty: 'basic',
+    level: 'basic',
     topic: 'data-structures',
     premium: false,
     description: 'Find two numbers in array that add up to target sum. Return their indices.',
@@ -79,11 +82,6 @@ export const problems: Problem[] = [
     constraints: ['2 ≤ nums.length ≤ 10⁴', 'Each input has exactly one solution'],
     starterCode: {
       python: `def twoSum(nums, target):
-    """
-    :type nums: List[int]
-    :type target: int
-    :rtype: List[int]
-    """
     # Write your code here
     pass`,
       cpp: `class Solution {
@@ -107,6 +105,7 @@ public:
     id: 'ds-2',
     title: 'Valid Parentheses',
     difficulty: 'basic',
+    level: 'basic',
     topic: 'data-structures',
     premium: false,
     description: 'Check if string with brackets (), {}, [] is valid. Open brackets must close in correct order.',
@@ -114,10 +113,6 @@ public:
     constraints: ['Use stack data structure', '1 ≤ s.length ≤ 10⁴'],
     starterCode: {
       python: `def isValid(s):
-    """
-    :type s: str
-    :rtype: bool
-    """
     # Write your code here
     pass`,
       cpp: `class Solution {
@@ -141,6 +136,7 @@ public:
     id: 'ds-3',
     title: 'Merge Two Sorted Arrays',
     difficulty: 'basic',
+    level: 'basic',
     topic: 'data-structures',
     premium: false,
     description: 'Merge two sorted arrays into one sorted array.',
@@ -148,11 +144,6 @@ public:
     constraints: ['Both arrays sorted', 'O(m+n) time'],
     starterCode: {
       python: `def merge(nums1, nums2):
-    """
-    :type nums1: List[int]
-    :type nums2: List[int]
-    :rtype: List[int]
-    """
     # Write your code here
     pass`,
       cpp: `class Solution {
@@ -176,6 +167,7 @@ public:
     id: 'ds-4',
     title: 'Remove Duplicates from Sorted Array',
     difficulty: 'basic',
+    level: 'basic',
     topic: 'data-structures',
     premium: true,
     description: 'Remove duplicates in-place and return new length.',
@@ -189,6 +181,7 @@ public:
     id: 'ds-5',
     title: 'First Unique Element',
     difficulty: 'basic',
+    level: 'basic',
     topic: 'data-structures',
     premium: true,
     description: 'Find first element that appears exactly once.',
@@ -202,6 +195,7 @@ public:
     id: 'ds-6',
     title: 'Majority Element',
     difficulty: 'basic',
+    level: 'basic',
     topic: 'data-structures',
     premium: true,
     description: 'Find element appearing more than n/2 times.',
@@ -215,6 +209,7 @@ public:
     id: 'ds-7',
     title: 'Rotate Array',
     difficulty: 'medium',
+    level: 'medium',
     topic: 'data-structures',
     premium: true,
     description: 'Rotate array right by k steps in-place.',
@@ -228,6 +223,7 @@ public:
     id: 'ds-8',
     title: 'Min Stack',
     difficulty: 'medium',
+    level: 'medium',
     topic: 'data-structures',
     premium: true,
     description: 'Stack with getMin in O(1).',
@@ -267,6 +263,7 @@ public:
     id: 'ds-9',
     title: 'LRU Cache',
     difficulty: 'medium',
+    level: 'medium',
     topic: 'data-structures',
     premium: true,
     description: 'Implement LRU cache with O(1) get and put.',
@@ -301,6 +298,7 @@ public:
     id: 'ds-10',
     title: 'Top K Frequent Elements',
     difficulty: 'medium',
+    level: 'medium',
     topic: 'data-structures',
     premium: true,
     description: 'Return k most frequent elements.',
@@ -314,6 +312,7 @@ public:
     id: 'ds-11',
     title: 'Product Except Self',
     difficulty: 'medium',
+    level: 'medium',
     topic: 'data-structures',
     premium: true,
     description: 'Return array where output[i] equals product of all except nums[i].',
@@ -327,6 +326,7 @@ public:
     id: 'ds-12',
     title: 'Longest Consecutive Sequence',
     difficulty: 'medium',
+    level: 'medium',
     topic: 'data-structures',
     premium: true,
     description: 'Find length of longest consecutive sequence.',
@@ -340,6 +340,7 @@ public:
     id: 'ds-13',
     title: 'Group Anagrams',
     difficulty: 'medium',
+    level: 'medium',
     topic: 'data-structures',
     premium: true,
     description: 'Group strings that are anagrams.',
@@ -353,6 +354,7 @@ public:
     id: 'ds-14',
     title: 'Sliding Window Maximum',
     difficulty: 'hard',
+    level: 'hard',
     topic: 'data-structures',
     premium: true,
     description: 'Find max in each window of size k.',
@@ -366,6 +368,7 @@ public:
     id: 'ds-15',
     title: 'Trapping Rain Water',
     difficulty: 'hard',
+    level: 'hard',
     topic: 'data-structures',
     premium: true,
     description: 'Calculate how much water can be trapped.',
@@ -383,46 +386,24 @@ public:
     id: 'tree-1',
     title: 'Maximum Depth',
     difficulty: 'basic',
+    level: 'basic',
     topic: 'trees',
     premium: false,
     description: 'Return maximum depth of binary tree.',
     examples: [{ input: '[3,9,20,null,null,15,7]', output: '3' }],
     constraints: ['Nodes: [0, 10^4]'],
     starterCode: {
-      python: `# Definition for a binary tree node.
-# class TreeNode:
-#     def __init__(self, val=0, left=None, right=None):
-#         self.val = val
-#         self.left = left
-#         self.right = right
-
-def maxDepth(root):
+      python: `def maxDepth(root):
     # Write your code here
     pass`,
-      cpp: `/**
- * Definition for a binary tree node.
- * struct TreeNode {
- *     int val;
- *     TreeNode *left;
- *     TreeNode *right;
- * };
- */
-class Solution {
+      cpp: `class Solution {
 public:
     int maxDepth(TreeNode* root) {
         // Write your code here
         
     }
 };`,
-      java: `/**
- * Definition for a binary tree node.
- * public class TreeNode {
- *     int val;
- *     TreeNode left;
- *     TreeNode right;
- * }
- */
-class Solution {
+      java: `class Solution {
     public int maxDepth(TreeNode root) {
         // Write your code here
         
@@ -436,6 +417,7 @@ class Solution {
     id: 'tree-2',
     title: 'Symmetric Tree',
     difficulty: 'basic',
+    level: 'basic',
     topic: 'trees',
     premium: false,
     description: 'Check if tree is symmetric.',
@@ -466,6 +448,7 @@ public:
     id: 'tree-3',
     title: 'Invert Binary Tree',
     difficulty: 'basic',
+    level: 'basic',
     topic: 'trees',
     premium: false,
     description: 'Invert a binary tree (swap left and right).',
@@ -496,6 +479,7 @@ public:
     id: 'tree-4',
     title: 'Path Sum',
     difficulty: 'basic',
+    level: 'basic',
     topic: 'trees',
     premium: false,
     description: 'Check if root-to-leaf path with given sum exists.',
@@ -526,6 +510,7 @@ public:
     id: 'tree-5',
     title: 'Same Tree',
     difficulty: 'basic',
+    level: 'basic',
     topic: 'trees',
     premium: false,
     description: 'Check if two trees are identical.',
@@ -556,6 +541,7 @@ public:
     id: 'tree-6',
     title: 'Level Order Traversal',
     difficulty: 'medium',
+    level: 'medium',
     topic: 'trees',
     premium: false,
     description: 'Return level order traversal (BFS).',
@@ -586,6 +572,7 @@ public:
     id: 'tree-7',
     title: 'Lowest Common Ancestor',
     difficulty: 'medium',
+    level: 'medium',
     topic: 'trees',
     premium: false,
     description: 'Find LCA of two nodes.',
@@ -616,6 +603,7 @@ public:
     id: 'tree-8',
     title: 'Right Side View',
     difficulty: 'medium',
+    level: 'medium',
     topic: 'trees',
     premium: false,
     description: 'Return nodes visible from right.',
@@ -646,6 +634,7 @@ public:
     id: 'tree-9',
     title: 'Zigzag Level Order',
     difficulty: 'medium',
+    level: 'medium',
     topic: 'trees',
     premium: true,
     description: 'Zigzag level order traversal.',
@@ -659,6 +648,7 @@ public:
     id: 'tree-10',
     title: 'Serialize Deserialize Tree',
     difficulty: 'hard',
+    level: 'hard',
     topic: 'trees',
     premium: true,
     description: 'Serialize and deserialize binary tree.',
@@ -687,6 +677,7 @@ public:
     id: 'tree-11',
     title: 'Maximum Path Sum',
     difficulty: 'hard',
+    level: 'hard',
     topic: 'trees',
     premium: true,
     description: 'Find maximum path sum in tree.',
@@ -700,6 +691,7 @@ public:
     id: 'tree-12',
     title: 'Binary Tree Cameras',
     difficulty: 'hard',
+    level: 'hard',
     topic: 'trees',
     premium: true,
     description: 'Minimum cameras to monitor all nodes.',
@@ -717,6 +709,7 @@ public:
     id: 'bst-1',
     title: 'Search in BST',
     difficulty: 'basic',
+    level: 'basic',
     topic: 'bst',
     premium: false,
     description: 'Find node with given value in BST.',
@@ -747,6 +740,7 @@ public:
     id: 'bst-2',
     title: 'Insert into BST',
     difficulty: 'basic',
+    level: 'basic',
     topic: 'bst',
     premium: false,
     description: 'Insert value into BST.',
@@ -777,6 +771,7 @@ public:
     id: 'bst-3',
     title: 'Validate BST',
     difficulty: 'medium',
+    level: 'medium',
     topic: 'bst',
     premium: false,
     description: 'Check if tree is valid BST.',
@@ -807,6 +802,7 @@ public:
     id: 'bst-4',
     title: 'Kth Smallest Element',
     difficulty: 'medium',
+    level: 'medium',
     topic: 'bst',
     premium: false,
     description: 'Find kth smallest in BST.',
@@ -837,6 +833,7 @@ public:
     id: 'bst-5',
     title: 'Sorted Array to BST',
     difficulty: 'basic',
+    level: 'basic',
     topic: 'bst',
     premium: false,
     description: 'Convert sorted array to balanced BST.',
@@ -867,6 +864,7 @@ public:
     id: 'bst-6',
     title: 'Delete Node in BST',
     difficulty: 'medium',
+    level: 'medium',
     topic: 'bst',
     premium: true,
     description: 'Delete node from BST.',
@@ -880,6 +878,7 @@ public:
     id: 'bst-7',
     title: 'BST to Greater Tree',
     difficulty: 'medium',
+    level: 'medium',
     topic: 'bst',
     premium: true,
     description: 'Convert BST where each node equals original plus sum of greater values.',
@@ -893,6 +892,7 @@ public:
     id: 'bst-8',
     title: 'Recover BST',
     difficulty: 'hard',
+    level: 'hard',
     topic: 'bst',
     premium: true,
     description: 'Recover BST where two nodes are swapped.',
@@ -910,6 +910,7 @@ public:
     id: 'graph-1',
     title: 'Number of Islands',
     difficulty: 'basic',
+    level: 'basic',
     topic: 'graphs',
     premium: false,
     description: 'Count islands in 2D grid.',
@@ -940,6 +941,7 @@ public:
     id: 'graph-2',
     title: 'Clone Graph',
     difficulty: 'basic',
+    level: 'basic',
     topic: 'graphs',
     premium: false,
     description: 'Deep copy of undirected graph.',
@@ -953,6 +955,7 @@ public:
     id: 'graph-3',
     title: 'Valid Path Exists',
     difficulty: 'basic',
+    level: 'basic',
     topic: 'graphs',
     premium: false,
     description: 'Check if path exists from source to destination.',
@@ -966,6 +969,7 @@ public:
     id: 'graph-4',
     title: 'All Paths Source to Target',
     difficulty: 'basic',
+    level: 'basic',
     topic: 'graphs',
     premium: false,
     description: 'Find all paths from 0 to n-1.',
@@ -979,6 +983,7 @@ public:
     id: 'graph-5',
     title: 'Course Schedule',
     difficulty: 'medium',
+    level: 'medium',
     topic: 'graphs',
     premium: false,
     description: 'Check if you can finish all courses (detect cycle).',
@@ -992,6 +997,7 @@ public:
     id: 'graph-6',
     title: 'Number of Provinces',
     difficulty: 'medium',
+    level: 'medium',
     topic: 'graphs',
     premium: false,
     description: 'Find number of connected components.',
@@ -1005,6 +1011,7 @@ public:
     id: 'graph-7',
     title: 'Surrounded Regions',
     difficulty: 'medium',
+    level: 'medium',
     topic: 'graphs',
     premium: false,
     description: 'Flip all O\'s surrounded by X.',
@@ -1018,6 +1025,7 @@ public:
     id: 'graph-8',
     title: 'Pacific Atlantic Water Flow',
     difficulty: 'medium',
+    level: 'medium',
     topic: 'graphs',
     premium: false,
     description: 'Find cells where water flows to both oceans.',
@@ -1031,6 +1039,7 @@ public:
     id: 'graph-9',
     title: 'Word Ladder',
     difficulty: 'medium',
+    level: 'medium',
     topic: 'graphs',
     premium: false,
     description: 'Shortest transformation sequence.',
@@ -1044,6 +1053,7 @@ public:
     id: 'graph-10',
     title: 'Shortest Path in Binary Matrix',
     difficulty: 'medium',
+    level: 'medium',
     topic: 'graphs',
     premium: false,
     description: 'Find shortest path from top-left to bottom-right.',
@@ -1057,6 +1067,7 @@ public:
     id: 'graph-11',
     title: 'Rotting Oranges',
     difficulty: 'medium',
+    level: 'medium',
     topic: 'graphs',
     premium: false,
     description: 'Minimum time for all oranges to rot.',
@@ -1070,6 +1081,7 @@ public:
     id: 'graph-12',
     title: 'Network Delay Time',
     difficulty: 'medium',
+    level: 'medium',
     topic: 'graphs',
     premium: false,
     description: 'Time for signal to reach all nodes.',
@@ -1087,6 +1099,7 @@ public:
     id: 'dp-1',
     title: 'Climbing Stairs',
     difficulty: 'basic',
+    level: 'basic',
     topic: 'dp',
     premium: false,
     description: 'Count ways to climb n stairs (1 or 2 steps).',
@@ -1100,6 +1113,7 @@ public:
     id: 'dp-2',
     title: 'House Robber',
     difficulty: 'basic',
+    level: 'basic',
     topic: 'dp',
     premium: false,
     description: 'Maximum money without robbing adjacent houses.',
@@ -1113,6 +1127,7 @@ public:
     id: 'dp-3',
     title: 'Coin Change',
     difficulty: 'medium',
+    level: 'medium',
     topic: 'dp',
     premium: false,
     description: 'Minimum coins to make amount.',
@@ -1126,6 +1141,7 @@ public:
     id: 'dp-4',
     title: 'Longest Increasing Subsequence',
     difficulty: 'medium',
+    level: 'medium',
     topic: 'dp',
     premium: false,
     description: 'Length of longest increasing subsequence.',
@@ -1139,6 +1155,7 @@ public:
     id: 'dp-5',
     title: 'Unique Paths',
     difficulty: 'medium',
+    level: 'medium',
     topic: 'dp',
     premium: false,
     description: 'Count paths in m×n grid (only right/down).',
@@ -1152,6 +1169,7 @@ public:
     id: 'dp-6',
     title: 'Longest Common Subsequence',
     difficulty: 'medium',
+    level: 'medium',
     topic: 'dp',
     premium: false,
     description: 'Length of LCS between two strings.',
@@ -1165,6 +1183,7 @@ public:
     id: 'dp-7',
     title: 'Word Break',
     difficulty: 'medium',
+    level: 'medium',
     topic: 'dp',
     premium: true,
     description: 'Check if string can be segmented into dictionary words.',
@@ -1178,6 +1197,7 @@ public:
     id: 'dp-8',
     title: 'Partition Equal Subset Sum',
     difficulty: 'medium',
+    level: 'medium',
     topic: 'dp',
     premium: true,
     description: 'Check if array can be partitioned into equal sum subsets.',
@@ -1191,6 +1211,7 @@ public:
     id: 'dp-9',
     title: 'Edit Distance',
     difficulty: 'hard',
+    level: 'hard',
     topic: 'dp',
     premium: true,
     description: 'Minimum operations to convert word1 to word2.',
@@ -1204,6 +1225,7 @@ public:
     id: 'dp-10',
     title: 'Regular Expression Matching',
     difficulty: 'hard',
+    level: 'hard',
     topic: 'dp',
     premium: true,
     description: 'Implement regex matching with . and *.',
@@ -1213,8 +1235,92 @@ public:
     testCases: [{ input: '"aa", "a*"', expectedOutput: 'true' }],
     completed: false
   },
+
+  // ============================================
+  // INTERVIEW PROBLEMS - COMPANY SPECIFIC (PREMIUM)
+  // ============================================
+  {
+    id: 'google-two-sum',
+    title: 'Two Sum (Google Favorite)',
+    topic: 'interviews',
+    level: 'premium',
+    difficulty: 'basic',
+    company: 'Google',
+    description: 'Find two numbers that add up to a specific target.',
+    premium: true,
+    starterCode: convertStarterCode('twoSum'),
+    testCases: [{ input: '[2,7,11,15], 9', expectedOutput: '[0,1]' }],
+    completed: false
+  },
+  {
+    id: 'amazon-lru-cache',
+    title: 'LRU Cache (Amazon)',
+    topic: 'interviews',
+    level: 'premium',
+    difficulty: 'medium',
+    company: 'Amazon',
+    description: 'Design and implement an LRU Cache.',
+    premium: true,
+    starterCode: convertStarterCode('LRUCache'),
+    testCases: [{ input: 'put(1,1), put(2,2), get(1)', expectedOutput: '1' }],
+    completed: false
+  },
+  {
+    id: 'meta-valid-palindrome',
+    title: 'Valid Palindrome (Meta)',
+    topic: 'interviews',
+    level: 'premium',
+    difficulty: 'basic',
+    company: 'Meta',
+    description: 'Check if a string is a valid palindrome.',
+    premium: true,
+    starterCode: convertStarterCode('isPalindrome'),
+    testCases: [{ input: '"A man, a plan, a canal: Panama"', expectedOutput: 'true' }],
+    completed: false
+  },
+  {
+    id: 'reverse-array',
+    title: 'Reverse Array',
+    topic: 'arrays',
+    level: 'basic',
+    difficulty: 'basic',
+    description: 'Reverse the given array.',
+    premium: false,
+    starterCode: convertStarterCode('reverseArray'),
+    testCases: [{ input: '[1,2,3,4]', expectedOutput: '[4,3,2,1]' }],
+    completed: false
+  },
+  {
+    id: 'binary-search',
+    title: 'Binary Search',
+    topic: 'searching',
+    level: 'medium',
+    difficulty: 'medium',
+    description: 'Implement binary search.',
+    premium: false,
+    starterCode: convertStarterCode('binarySearch'),
+    testCases: [{ input: '[1,2,3,4,5], 4', expectedOutput: '3' }],
+    completed: false
+  },
+  {
+    id: 'merge-intervals',
+    title: 'Merge Intervals',
+    topic: 'arrays',
+    level: 'hard',
+    difficulty: 'hard',
+    description: 'Merge overlapping intervals.',
+    premium: false,
+    starterCode: convertStarterCode('mergeIntervals'),
+    testCases: [{ input: '[[1,3],[2,6],[8,10]]', expectedOutput: '[[1,6],[8,10]]' }],
+    completed: false
+  }
 ]
 
-export function getProblemsByTopicAndLevel(topic: string, level: string): Problem[] {
-  return problems.filter(p => p.topic === topic && p.difficulty === level)
+export function getProblemsByTopicAndLevel(topic: string, level: Level | DifficultyLevel) {
+  return problems.filter(p => {
+    const matchTopic = p.topic === topic
+    const matchLevel = p.level === level || p.difficulty === level
+    return matchTopic && matchLevel
+  })
 }
+
