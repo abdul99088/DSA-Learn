@@ -40,7 +40,7 @@ export default function PremiumModal({ isOpen, onClose, onSuccess }: PremiumModa
 
   const prices = {
     monthly: { pkr: 699, usd: 2.99 },
-    yearly: { pkr: 9999, usd: 59.99 }
+   yearly: { pkr: 9999, usd: 59.99 }
   }
 
   const copyToClipboard = (text: string, field: string) => {
