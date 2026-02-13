@@ -50,7 +50,7 @@ Return ONE complete hint sentence ending with a period.
               contents: [{ parts: [{ text: prompt }] }],
               generationConfig: {
                 temperature: 0.4,
-                maxOutputTokens: 180,
+                maxOutputTokens: 200,
               },
             }),
           }

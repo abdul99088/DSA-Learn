@@ -22,7 +22,7 @@ export default function Dashboard({ onTopicSelect, isAdmin = false }: DashboardP
   const [userStats, setUserStats] = useState({
     problemsSolved: 0,
     currentStreak: 0,
-    totalProblems: 57,
+    totalProblems: 60,
     progressPercentage: 0
   })
 
@@ -52,7 +52,7 @@ export default function Dashboard({ onTopicSelect, isAdmin = false }: DashboardP
       }
 
       const problemsSolved = solvedProblems?.length || 0
-      const totalProblems = 57
+      const totalProblems = 60
       const progressPercentage = totalProblems > 0 
         ? Math.round((problemsSolved / totalProblems) * 100) 
         : 0
@@ -221,7 +221,7 @@ export default function Dashboard({ onTopicSelect, isAdmin = false }: DashboardP
         fontSize: '12px',
         fontWeight: 'bold'
       }}>
-        Modal: {showPremiumModal ? '✅ OPEN' : '❌ CLOSED'}
+        Modal: {showPremiumModal ? ' OPEN' : ' CLOSED'}
       </div>
 
       <div className="fixed inset-0 bg-gradient-to-br from-blue-600/5 via-cyan-500/5 to-blue-400/5 pointer-events-none" />
